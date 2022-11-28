@@ -1,0 +1,111 @@
+<!doctype html>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="UTF-8">
+<title>SSURGO Playground</title>
+
+<script src="pmj.js"></script>
+<script src="default.js"></script>
+
+<link rel="stylesheet" href="default.css">
+
+<nav>
+  <button class="ssurgo selected" accesskey="S"><u>S</u>SURGO Data</button>
+  <button class="documentation"   accesskey="O">D<u>o</u>cumentation</button>
+</nav>
+
+<div id="SSURGO">
+  <div class="ssurgo">
+    <table>
+      <tr><td>Latitude  <td><input id="Lat" type="text" value="39.032056">
+          <td rowspan="4">
+            These queries will be sent to the USDA server:
+            <textarea id="Query" cols="10000"></textarea>
+      <tr><td>Longitude <td><input id="Lon" type="text" value="-76.873972">
+      <tr id="Categories">
+        <td>
+          <p>Default categories:</p>
+          <label><input class="on"  type="checkbox" value="legend"          checked>legend         </label><br>
+          <label><input class="on"  type="checkbox" value="mapunit"         checked>mapunit        </label><br>
+          <label><input class="on"  type="checkbox" value="component"       checked>component      </label><br>
+          <label><input class="on"  type="checkbox" value="horizon"         checked>horizon        </label><br>
+          <label><input class="on"  type="checkbox" value="textureclass"    checked>textureclass   </label><br>
+          <label><input class="on"  type="checkbox" value="parentmaterial"  checked>parentmaterial </label><br>
+          <label><input class="on"  type="checkbox" value="restrictions"    checked>restrictions   </label><br>
+
+        <td>
+          <p>Additional categories:</p>
+          <label><input class="off" type="checkbox" value="sacatalog"              >sacatalog      </label><br>
+          <label><input class="off" type="checkbox" value="pores"                  >pores          </label><br>
+          <label><input class="off" type="checkbox" value="structure"              >structure      </label><br>
+          <label><input class="off" type="checkbox" value="canopycover"            >canopycover    </label><br>
+          <label><input class="off" type="checkbox" value="cropyield"              >cropyield      </label><br>
+          <label><input class="off" type="checkbox" value="monthlystats"           >monthlystats   </label><br>
+      <tr>
+        <td colspan="2" class="buttons">
+          <button id="Defaults">Defaults</button>
+          <button id="Clear">Clear all</button>
+
+      <tr><td>Filter    <td colspan="2"><input id="Filter" type="text" zvalue="hzname='A'">
+
+    </table>
+
+    <p>URL: <span id="URL" colspan="3"></span></p>
+
+    Download: 
+    <button id="HTML" accesskey="H"><u>H</u>TML</button>
+    <button id="CSV"  accesskey="C"><u>C</u>SV</button>
+    <button id="JSON" accesskey="J"><u>J</u>SON</button>
+  </div>
+
+  <div id="Status"></div>
+
+  <div id="Data">
+  </div>
+</div>
+
+<div id="Documentation" class="hidden">
+  <h2>Usage</h2>
+  <p class="usage indent">https://weather.aesl.ces.uga.edu/ssurgo?lat=<i>latitude</i>&lon=<i>longitude</i> [<i>parameters</i>]</p>
+
+  <p>&hellip; where <i>parameters</i> can be zero or more of:</p>
+
+  <table class="indent">
+    <tr><td><p>&output=<b>json</b>|csv|html</p>
+        <td><p><strong>output</strong> defaults to <strong>json</strong></p>
+    <tr><td><p>&categories=<i>list</i></p>
+        <td><p><strong>categories</strong> defaults to:</p>
+            <p class="indent"><strong class="plus">+legend,+mapunit,+component,+horizon,+textureclass,+parentmaterial,+restrictions,</strong><strong class="minus">-sacatalog,-pores,-structure,-canopycover,-cropyield,-monthlystats</strong></p>
+            <p>Use <span class="plus">plus (+)</span> to include a category and <span class="minus">minus (-)</span> to exclude it. The order doesn't matter, and commas are optional.</p>
+            <p>The API will return all the <span class="plus">plus (+)</span> defaults unless they are explicitly excluded.</p>
+            <p>You can also clear all defaults by including the word <strong>clear</strong> in the list.  This is especially useful if you're interested in a single category, for example:</p>
+            <p class="indent"><strong>categories=clear,+structure</strong></p>
+            <p>See the <strong>Data Dictionary</strong> below for what is included in each category.</p>
+    
+    <tr><td><p>&filter=<i>filter</i></p>
+        <td><p>A comma-separate list of filters based on Column Name.</p>
+            <p>Example: <strong>&filter=hzname='A',comppct_r>20,month='August'</strong></p>
+
+    <tr><td><p>&mukey=<i>mukey1[,mukey2,&hellip;]
+        <td><p>A comma-separated list of mukeys.  (You can use mukeys in place of lat/lon.)</p>
+            <p>Example: <strong>&mukey=2455277,289215,161545</strong></p>
+
+    <tr><td><p>&component=major</p>
+        <td><p>Output major component only.</p>
+
+    <tr><td><p>&component=max</p>
+        <td><p>Output maximum component only.</p> 
+
+    <tr><td><p>&save=<i>description</i></p>
+        <td><p>If used, the results of the query will be saved to the database for immediate retrieval in the future.</p>
+            <p>Note that SSURGO data may change over time, so use this option <em>only</em> if:
+            <ul type="a">
+              <li>You don't want the data to change.  For example, you may not want your models to show different results over time, even if the changes may be minor.
+              <li>The increase in speed offsets the benefit of having the most up-to-date data.
+            </ul>
+  </table>
+
+  <hr>
+  <h2>Data Dictionary</h2>
+  <table id="Dictionary">
+  </table>
+</div>

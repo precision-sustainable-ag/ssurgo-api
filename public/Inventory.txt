@@ -1,0 +1,294 @@
+Category	Table Name	Table Label	Column Name	Column Label	Description
+sacatalog	sacatalog	Survey Area Catalog	areasymbol	Area symbol	A symbol that uniquely identifies a single occurrence of a particular type of area (e.g. Lancaster Co., Nebraska is NE109).
+			areaname	Area name	The name given to the specified geographic area.
+			saverest	Survey Area Version Established	The date and time that a particular version of data for the soil survey area was established.
+			mbrminx	Minimum Bounding Rectangle Minimum X	The minimum X coordinate for a soil survey area's minimum bounding rectangle, expressed in decimal degrees west or east of the prime meridian. Minimum corresponds to the southwest corner of the bounding rectangle.
+			mbrminy	Minimum Bounding Rectangle Minimum Y	The minimum Y coordinate for a soil survey area's minimum bounding rectangle, expressed in decimal degress north or south of the equator. Minimum corresponds to the southwest corner of the bounding rectangle.
+			mbrmaxx	Minimum Bounding Rectangle Maximum X	The maximum X coordinate for a soil survey area's minimum bounding rectangle, expressed in decimal degrees west or east of the prime meridian. Maximum corresponds to the northest corner of the bounding rectangle.
+			mbrmaxy	Minimum Bounding Rectangle Maximum Y	The maximum Y coordinate for a soil survey area's minimum bounding rectangle, expressed in decimal degress north or south of the equator. Maximum corresponds to the northest corner of the bounding rectangle.
+legend	legend	Legend	areasymbol	Area symbol	A symbol that uniquely identifies a single occurrence of a particular type of area (e.g. Lancaster Co., Nebraska is NE109).
+			areaacres	Area acres	The acreage total of all land and water areas in the specified geographic area.
+			projectscale	Project scale	The map scale in which the final map products will be published, expressed as the denominator of the scale, i.e. 24000 = 1:24000.
+			lkey	Legend key	A non-connotative string of characters used to uniquely identify a record in the Legend table.
+mapunit	mapunit	Mapunit	lkey	Legend key	A non-connotative string of characters used to uniquely identify a record in the Legend table.
+			musym	Mapunit symbol	The symbol used to uniquely identify the soil 1 mapunit in the soil survey.
+			muname	Mapunit name	Correlated name of the mapunit.
+			mukind	Mapunit kind	Code identifying the kind of mapunit.
+			muacres	Total acres	The number of acres of a particular mapunit.
+			farmlndcl	Farm class	Identification of map units as prime farmland, farmland of statewide importance, or farmland of local importance.
+			iacornsr	IA CSR	Corn Suitability Rating (CSR) is an index procedure developed in Iowa to rate each different kind of soil for its row-crop productivity.
+			mukey	Mapunit key	A non-connotative string of characters used to uniquely identify a record in the Mapunit table.
+component	component	Component	mukey	Mapunit key	A non-connotative string of characters used to uniquely identify a record in the Mapunit table.
+			comppct_l	Component % [low]	The percentage of the component of the mapunit.
+			comppct_r	Component % [representative]	The percentage of the component of the mapunit.
+			comppct_h	Component % [high]	The percentage of the component of the mapunit.
+			compname	Component name	Name assigned to a component based on its range of properties.
+			compkind	Component kind	Identifies the kind of component of the mapunit. Examples are series and miscellaneous areas.
+			majcompflag	Major component	Indicates whether or not a component is a major component in the mapunit.
+			slope_l	Slope gradient [low]	The difference in elevation between two points, expressed as a percentage of the distance between those points. (SSM)
+			slope_r	Slope gradient [representative]	The difference in elevation between two points, expressed as a percentage of the distance between those points. (SSM)
+			slope_h	Slope gradient [high]	The difference in elevation between two points, expressed as a percentage of the distance between those points. (SSM)
+			slopelenusle_l	Slope length USLE [low]	The distance from the point of origin of overland flow to the point where either the slope gradient decreases enough that deposition begins, or the runoff water enters a well-defined channel that may be part of a drainage network or a constructed channel. (Predicting Rainfall Erosion Losses a Guide to Conservation Planning, Agr. Handbook #537, USDA, 1978).
+			slopelenusle_r	Slope length USLE [representative]	
+			slopelenusle_h	Slope length USLE [high]	
+			runoff	Runoff class	Runoff potential class for the soil.
+			erocl	Erosion class	Class of accelerated erosion. (SSM)
+			hydricrating	Hydric rating	A yes/no field that indicates whether or not a map unit component is classified as a "hydric soil". 
+			hydricon	Hydric condition	Natural condition of the soil component.
+			drainagecl	Drainage class	Identifies the natural drainage conditions of the soil and refers to the frequency and duration of wet periods.
+			elev_l	Elevation [low]	The vertical distance from mean sea level to a point on the earth's surface.
+			elev_r	Elevation [representative]	The vertical distance from mean sea level to a point on the earth's surface.
+			elev_h	Elevation [high]	The vertical distance from mean sea level to a point on the earth's surface.
+			geomdesc	Geomorphic Description	A narrative description of the geomorphic setting of a component. The description may incorporate multiple geomorphic features as well as their relationship to each other. The individual parts of the description are recorded in the Component Geomorphic Description table.
+			map_l	MAP [low]	The arithmetic average of the total annual (liquid) precipitation taken over the standard "normal" period, 1961-1990.
+			map_r	MAP [representative]	The arithmetic average of the total annual (liquid) precipitation taken over the standard "normal" period, 1961-1990.
+			map_h	MAP [annual]	The arithmetic average of the total annual (liquid) precipitation taken over the standard "normal" period, 1961-1990.
+			ffd_l	Frost free days [low]	The expected number of days between the last freezing temperature (0 degrees Celsius) in spring (Jan-Jul) and the first freezing temperature (0 degrees Celsius) in the fall (Aug-Dec). The number of days is based on the probability that the values for the standard "normal" period of 1961 to 1990 will be exceeded in 5 years out of 10.
+			ffd_r	Frost free days [representative]	
+			ffd_h	Frost free days [high]	
+			frostact	Frost action	An interpretation rating of the susceptibility of the soil to frost heaving.
+			hydgrp	Hydrologic group	A group of soils having similar runoff potential under similar storm and cover conditions. Examples are A and A/D. (NSSH)
+			taxclname	Taxonomic class	A concatenation of the Soil Taxonomy subgroup and family for a soil (long name)
+			taxorder	Order	The highest level in Soil Taxonomy.
+			taxsuborder	Suborder	The second level of Soil Taxonomy. The suborder is below the order and above the great group.
+			taxgrtgroup	Great group	The third level of Soil Taxonomy. The category is below the suborder and above the subgroup.
+			taxsubgrp	Subgroup	The fourth level of Soil Taxonomy. The subgroup is below great group and above family.
+			taxpartsize	Particle size	Particle-size classes are used as family differentiae. Particle-size refers to grain-size distribution of the whole soil and is not the same as texture. (Soil Taxonomy).
+			taxpartsizemod	Particle size mod	Taxonomic family criteria that is used to indicate the presence of more than two strongly contrasting classes in the particle size control section. (Soil Taxonomy)
+			taxceactcl	CEC Activity Cl	Cation exchange activity classes are used as family criteria differentiae. It is the relative cation exchange (CEC) activity level of the soil based on the CEC to clay ratio. (Soil Taxonomy)
+			taxreaction	Reaction	Indicates the presence or absence of carbonates and the reaction. They are treated together because of their intimate relationship, and are used to indicate family differentiae. (Soil Taxonomy)
+			taxtempcl	Temperature class	The taxonomic family temperature class used to construct the official classification name. It may be null when the taxonomic family temperature class is embedded in the classification name. The actual taxonomic temperature regime is recorded in another place.
+			taxmoistscl	Moisture subclass	Soil moisture subclasses are taxonomic subgroup criteria, whether included or not in the name of the subgroup. The definition of each subclass is dependent upon the specific taxonomic great group to which it is attached.
+			taxtempregime	Temperature regime	Soil temperature regime as defined in Soil Taxonomy.
+			soiltaxedition	Keys to Taxonomy edition used	The edition of Keys to Soil Taxonomy used to classify the soil.
+			cokey	Component key	A non-connotative string of characters used to uniquely identify a record in the Component table.
+horizon	chorizon	Horizon	cokey	Component key	A non-connotative string of characters used to uniquely identify a record in the Component table.
+			hzname	Designation	The concatenated string of four kinds of symbols (five data elements) used to distinguish different kinds of layers in the soil. (SSM)
+			desgndisc	Disc	An Arabic numeral used to indicate a significant change in particle-size distribution or mineralogy that indicates a difference in the material from which the horizon(s) formed and/or a significant difference in age, unless that difference in age is indicated by the suffix "b". (SSM) 
+			desgnmaster	Master	One of four kinds of symbols, that when concatenated, are used to distinguish different kinds of layers in soils. Master horizons and layers are the base symbols to which other characters are added to complete the designations. Capital letters, virgules (/), and ampersands (&) are used. (SSM)
+			desgnmasterprime	Prime	A character used to indicate that this horizon has an identical horizon designation as some overlying horizon. The two horizons in question are separated by at least one other horizon.
+			desgnvert	Sub	One of the four kinds of symbols, when concatenated, are used to distinguish different kinds of layers in soils. Vertical subdivisions are used to subdivide a horizon or layer designated by a single letter or combination of letters.
+			hzdept_l	Top depth [low]	The distance from the top of the soil to the upper boundary of the soil horizon.
+			hzdept_r	Top depth [representative]	The distance from the top of the soil to the upper boundary of the soil horizon.
+			hzdept_h	Top depth [high]	The distance from the top of the soil to the upper boundary of the soil horizon.
+			hzdepb_l	Bottom depth [low]	The distance from the top of the soil to the base of the soil horizon.
+			hzdepb_r	Bottom depth [representative]	The distance from the top of the soil to the base of the soil horizon.
+			hzdepb_h	Bottom depth [high]	The distance from the top of the soil to the base of the soil horizon.
+			hzthk_l	Thickness [low]	A measurement from the top to bottom of a soil horizon throughout its areal extent.
+			hzthk_r	Thickness [representative]	A measurement from the top to bottom of a soil horizon throughout its areal extent.
+			hzthk_h	Thickness [high]	A measurement from the top to bottom of a soil horizon throughout its areal extent.
+			fraggt10_l	Rock > 10 [low]	The percent by weight of the horizon occupied by rock fragments greater than 10 inches in size.
+			fraggt10_r	Rock > 10 [representative]	The percent by weight of the horizon occupied by rock fragments greater than 10 inches in size.
+			fraggt10_h	Rock > 10 [high]	The percent by weight of the horizon occupied by rock fragments greater than 10 inches in size.
+			frag3to10_l	Rock 3-10 [low]	The percent by weight of the horizon occupied by rock fragments 3 to 10 inches in size.
+			frag3to10_r	Rock 3-10 [representative]	The percent by weight of the horizon occupied by rock fragments 3 to 10 inches in size.
+			frag3to10_h	Rock 3-10 [high]	The percent by weight of the horizon occupied by rock fragments 3 to 10 inches in size.
+			sieveno4_l	Sieve #4 [low]	Soil fraction passing a number 4 sieve (4.70mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno4_r	Sieve #4 [representative]	Soil fraction passing a number 4 sieve (4.70mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno4_h	Sieve #4 [high]	Soil fraction passing a number 4 sieve (4.70mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno10_l	Sieve #10 [low]	Soil fraction passing a number 10 sieve (2.00mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno10_r	Sieve #10 [representative]	Soil fraction passing a number 10 sieve (2.00mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno10_h	Sieve #10 [high]	Soil fraction passing a number 10 sieve (2.00mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno40_l	Sieve #40 [low]	Soil fraction passing a number 40 sieve (0.42mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno40_r	Sieve #40 [representative]	Soil fraction passing a number 40 sieve (0.42mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno40_h	Sieve #40 [high]	Soil fraction passing a number 40 sieve (0.42mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno200_l	Sieve #200 [low]	Soil fraction passing a number 200 sieve (0.074mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno200_r	Sieve #200 [representative]	Soil fraction passing a number 200 sieve (0.074mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sieveno200_h	Sieve #200 [high]	Soil fraction passing a number 200 sieve (0.074mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.
+			sandtotal_l	Total sand [low]	Mineral particles 0.05mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandtotal_r	Total sand [intermediate]	Mineral particles 0.05mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandtotal_h	Total sand [high]	Mineral particles 0.05mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandvc_l	Very coarse sand [low]	Mineral particles 1.0mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandvc_r	Very coarse sand [representative]	Mineral particles 1.0mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandvc_h	Very coarse sand [high]	Mineral particles 1.0mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandco_l	Coarse sand [low]	Mineral particles 0.5mm to 1.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandco_r	Coarse sand [representative]	Mineral particles 0.5mm to 1.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandco_h	Coarse sand [high]	Mineral particles 0.5mm to 1.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandmed_l	Medium sand [low]	Mineral particles 0.25mm to 0.5mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandmed_r	Medium sand [representative]	Mineral particles 0.25mm to 0.5mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandmed_h	Medium sand [high]	Mineral particles 0.25mm to 0.5mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandfine_l	Fine sand [low]	Mineral particles 0.10 to 0.25mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandfine_r	Fine sand [representatie]	Mineral particles 0.10 to 0.25mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandfine_h	Fine sand [high]	Mineral particles 0.10 to 0.25mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandvf_l	Very fine sand [low]	Mineral particles 0.05 to 0.10mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandvf_r	Very fine sand [representative]	Mineral particles 0.05 to 0.10mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			sandvf_h	Very fine sand [high]	Mineral particles 0.05 to 0.10mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.
+			silttotal_l	Total silt [low]	Mineral particles 0.002 to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			silttotal_r	Total silt [representative]	Mineral particles 0.002 to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			silttotal_h	Total silt [high]	Mineral particles 0.002 to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			siltco_l	Coarse silt [low]	Mineral particles ranging in size from 0.02mm to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			siltco_r	Coarse silt [representative]	Mineral particles ranging in size from 0.02mm to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			siltco_h	Coarse silt [high]	Mineral particles ranging in size from 0.02mm to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			siltfine_l	Fine silt [low]	Mineral particles ranging in size from 0.002 to 0.02mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			siltfine_r	Fine silt [representative]	Mineral particles ranging in size from 0.002 to 0.02mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			siltfine_h	Fine silt [high]	Mineral particles ranging in size from 0.002 to 0.02mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			claytotal_l	Total clay [low]	Mineral particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			claytotal_r	Total clay [representative]	Mineral particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			claytotal_h	Total clay [high]	Mineral particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			claysizedcarb_l	CaCO3 Clay [low]	Carbonate particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			claysizedcarb_r	CaCO3 Clay [representative]	Carbonate particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			claysizedcarb_h	CaCO3 Clay [high]	Carbonate particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.
+			om_l	Organic matter [low]	The amount by weight of decomposed plant and animal residue expressed as a weight percentage of the less than 2 mm soil material.
+			om_r	Organic matter [representative]	The amount by weight of decomposed plant and animal residue expressed as a weight percentage of the less than 2 mm soil material.
+			om_h	Organic matter [high]	The amount by weight of decomposed plant and animal residue expressed as a weight percentage of the less than 2 mm soil material.
+			dbtenthbar_l	Db 0.1 bar H2O [low]	The oven dried weight of the less than 2 mm soil material per unit volume of soil at a water tension of 1/10 bar.
+			dbtenthbar_r	Db 0.1 bar H2O [representative]	The oven dried weight of the less than 2 mm soil material per unit volume of soil at a water tension of 1/10 bar.
+			dbtenthbar_h	Db 0.1 bar H2O [high]	The oven dried weight of the less than 2 mm soil material per unit volume of soil at a water tension of 1/10 bar.
+			dbthirdbar_l	Db 0.33 bar H2O [low]	The oven dry weight of the less than 2 mm soil material per unit volume of soil at a water tension of 1/3 bar.
+			dbthirdbar_r	Db 0.33 bar H2O [representative]	The oven dry weight of the less than 2 mm soil material per unit volume of soil at a water tension of 1/3 bar.
+			dbthirdbar_h	Db 0.33 bar H2O [high]	The oven dry weight of the less than 2 mm soil material per unit volume of soil at a water tension of 1/3 bar.
+			dbfifteenbar_l	Db 15 bar H2O [low]	The oven dry weight of the less than 2 mm soil material per unit volume of soil at a water tension of 15 bar.
+			dbfifteenbar_r	Db 15 bar H2O [representative]	The oven dry weight of the less than 2 mm soil material per unit volume of soil at a water tension of 15 bar.
+			dbfifteenbar_h	Db 15 bar H2O [high]	The oven dry weight of the less than 2 mm soil material per unit volume of soil at a water tension of 15 bar.
+			dbovendry_l	Db oven dry [low]	The oven dry weight of the less than 2 mm soil material per unit volume of soil exclusive of the desication cracks, measured on a coated clod.
+			dbovendry_r	Db oven dry [representative]	The oven dry weight of the less than 2 mm soil material per unit volume of soil exclusive of the desication cracks, measured on a coated clod.
+			dbovendry_h	Db oven dry [high]	The oven dry weight of the less than 2 mm soil material per unit volume of soil exclusive of the desication cracks, measured on a coated clod.
+			partdensity	Particle density	Mass per unit of volume (not including pore space) of the solid soil particle either mineral or organic. Also known as specific gravity.
+			ksat_l	Saturated hydraulic conductivity [low]	The amount of water that would move vertically through a unit area of saturated soil in unit time under unit hydraulic gradient.
+			ksat_r	Saturated hydraulic conductivity [representative]	The amount of water that would move vertically through a unit area of saturated soil in unit time under unit hydraulic gradient.
+			ksat_h	Saturated hydraulic conductivity [high]	The amount of water that would move vertically through a unit area of saturated soil in unit time under unit hydraulic gradient.
+			awc_l	Available water content [low]	The amount of water that an increment of soil depth, inclusive of fragments, can store that is available to plants. AWC is expressed as a volume fraction, and is commonly estimated as the difference between the water contents at 1/10 or 1/3 bar (field capacity) and 15 bars (permanent wilting point) tension and adjusted for salinity, and fragments.
+			awc_r	Available water content [representative]	
+			awc_h	Available water content [high]	
+			wtenthbar_l	0.1 bar H2O [low]	The volumetric content of soil water retained at a tension of 1/10 bar (10 kPa), expressed as a percentage of the whole soil.
+			wtenthbar_r	0.1 bar H2O [representative]	The volumetric content of soil water retained at a tension of 1/10 bar (10 kPa), expressed as a percentage of the whole soil.
+			wtenthbar_h	0.1 bar H2O [high]	The volumetric content of soil water retained at a tension of 1/10 bar (10 kPa), expressed as a percentage of the whole soil.
+			wthirdbar_l	0.33 bar H2O [low]	The volumetric content of soil water retained at a tension of 1/3 bar (33 kPa), expressed as a percentage of the whole soil.
+			wthirdbar_r	0.33 bar H2O [representative]	The volumetric content of soil water retained at a tension of 1/3 bar (33 kPa), expressed as a percentage of the whole soil.
+			wthirdbar_h	0.33 bar H2O [high]	The volumetric content of soil water retained at a tension of 1/3 bar (33 kPa), expressed as a percentage of the whole soil.
+			wfifteenbar_l	15 bar H2O [low]	The volumetric content of soil water retained at a tension of 15 bars (1500 kPa), expressed as a percentage of the whole soil.
+			wfifteenbar_r	15 bar H2O [representative]	The volumetric content of soil water retained at a tension of 15 bars (1500 kPa), expressed as a percentage of the whole soil.
+			wfifteenbar_h	15 bar H2O [high]	The volumetric content of soil water retained at a tension of 15 bars (1500 kPa), expressed as a percentage of the whole soil.
+			wsatiated_l	Saturated water content [low]	The estimated volumetric soil water content at or near zero bar tension, expressed as a percentage of the whole soil.
+			wsatiated_r	Saturated water content [representative]	The estimated volumetric soil water content at or near zero bar tension, expressed as a percentage of the whole soil.
+			wsatiated_h	Saturated water content [high]	The estimated volumetric soil water content at or near zero bar tension, expressed as a percentage of the whole soil.
+			ll_l	Liquid limit [low]	The water content of the soil at the change between the liquid and plastic states.
+			ll_r	Liquid limit [representative]	The water content of the soil at the change between the liquid and plastic states.
+			ll_h	Liquid limit [high]	The water content of the soil at the change between the liquid and plastic states.
+			pi_l	Plasticity index [low]	The numerical difference between the liquid limit and plastic limit.
+			pi_r	Plasticity index [representative]	The numerical difference between the liquid limit and plastic limit.
+			pi_h	Plasticity index [high]	The numerical difference between the liquid limit and plastic limit.
+			kwfact	Kw	An erodibility factor which quantifies the susceptibility of soil particles to detachment and movement by water. This factor is adjusted for the effect of rock fragments.
+			kffact	Kf	An erodibility factor which quantifies the susceptibility of soil particles to detachment by water.
+			caco3_l	CaCO3 [low]	The quantity of Carbonate (CO3) in the soil expressed as CaCO3 and as a weight percentage of the less than 2 mm size fraction.
+			caco3_r	CaCO3 [representative]	The quantity of Carbonate (CO3) in the soil expressed as CaCO3 and as a weight percentage of the less than 2 mm size fraction.
+			caco3_h	CaCO3 [high]	The quantity of Carbonate (CO3) in the soil expressed as CaCO3 and as a weight percentage of the less than 2 mm size fraction.
+			gypsum_l	Gypsum [low]	The percent by weight of hydrated calcium sulfate in the less than 20 mm fraction of soil.
+			gypsum_r	Gypsum [representative]	The percent by weight of hydrated calcium sulfate in the less than 20 mm fraction of soil.
+			gypsum_h	Gypsum [high]	The percent by weight of hydrated calcium sulfate in the less than 20 mm fraction of soil.
+			sar_l	SAR [low]	A measure of the amount of Sodium (Na) relative to Calcium (Ca) and Magnesium (Mg) in the water extract from saturated soil paste.
+			sar_r	SAR [representative]	A measure of the amount of Sodium (Na) relative to Calcium (Ca) and Magnesium (Mg) in the water extract from saturated soil paste.
+			sar_h	SAR [high]	A measure of the amount of Sodium (Na) relative to Calcium (Ca) and Magnesium (Mg) in the water extract from saturated soil paste.
+			ec_l	EC [low]	The electrical conductivity of an extract from saturated soil paste.
+			ec_r	EC [representative]	The electrical conductivity of an extract from saturated soil paste.
+			ec_h	EC [high]	The electrical conductivity of an extract from saturated soil paste.
+			cec7_l	CEC-7 [low]	The amount of readily exchangeable cations that can be electrically adsorbed to negative charges in the soil, soil constituent, or other material, at pH 7.0, as estimated by the ammonium acetate method.
+			cec7_r	CEC-7 [representative]	
+			cec7_h	CEC-7 [high]	
+			ecec_l	ECEC [low]	The sum of NH4OAc extractable bases plus 50 KCl extractable aluminum.
+			ecec_r	ECEC [representative]	The sum of NH4OAc extractable bases plus 50 KCl extractable aluminum.
+			ecec_h	ECEC [high]	The sum of NH4OAc extractable bases plus 50 KCl extractable aluminum.
+			sumbases_l	Sum of bases [low]	The sum of NH4OAc extractable bases (pH 7.0), reported on less than 2mm base.
+			sumbases_r	Sum of bases [representative]	The sum of NH4OAc extractable bases (pH 7.0), reported on less than 2mm base.
+			sumbases_h	Sum of bases [high]	The sum of NH4OAc extractable bases (pH 7.0), reported on less than 2mm base.
+			ph1to1h2o_l	pH H2O [low]	The negative logarithm to the base 10, of the hydrogen ion activity in the soil using the 1:1 soil-water ratio method. A numerical expression of the relative acidity or alkalinity of a soil sample. (SSM)
+			ph1to1h2o_r	pH H2O [representative]	
+			ph1to1h2o_h	pH H2O [high]	
+			ph01mcacl2_l	pH CaCl2 [low]	The negative logarithm to base of 10 or the hydrogen ion activity in the soil, using the 0.01M CaCl2 method, in a 1:2 soil:solution ratio. A numerical expression of the relative acidity or alkalinity of a soil sample. (SSM)
+			ph01mcacl2_r	pH CaCl2 [representative]	
+			ph01mcacl2_h	pH CaCl2 [high]	
+			pbray1_l	Bray 1 Phosphorus [low]	The amount of phosphorous in the less than 2mm fraction, that is extractable using the Bray1 method. It represents the plant available phosphorous content.
+			pbray1_r	Bray 1 Phosphorus [representative]	
+			pbray1_h	Bray 1 Phosphorus [high]	
+			poxalate_l	Oxalate Phosphorus [low]	The amount of phosphorous in the less than 2mm fraction, that is extractable by aluminum oxalate method. It represents the phosphorous level intermediate between total P and water soluble P.
+			poxalate_r	Oxalate Phosphorus [representative]	
+			poxalate_h	Oxalate Phosphorus [high]	
+			ph2osoluble_l	Water soluble Phosphorus [low]	The amount of water soluble phosphorous in the less than 2mm fraction, that is extractable by distilled water. It represents the mobile phosphorous content.
+			ph2osoluble_r	Water soluble Phosphorus [representative]	
+			ph2osoluble_h	Water soluble Phosphorus [high]	
+			ptotal_l	Total Phosphorus [low]	The estimate of the total phosphorous content of the soil, measured after total dissolution of a size fraction of the soil material. It is reported as a gravimetric percent oxide of the size fraction used.
+			ptotal_r	Total Phosphorus [representative]	
+			ptotal_h	Total Phosphorus [high]	
+			chkey	Chorizon key	A non-connotative string of characters used to uniquely identify a record in the Horizon table.
+pores	chpores	Horizon pores	chkey	Chorizon key	A non-connotative string of characters used to uniquely identify a record in the Horizon table.
+			poreqty_l	Pore quantity [low]	The number of a selected size of pores per unit area of undisturbed soils.
+			poreqty_r	Pore quantity [representative]	The number of a selected size of pores per unit area of undisturbed soils.
+			poreqty_h	Pore quantity [high]	The number of a selected size of pores per unit area of undisturbed soils.
+			poresize	Pore size	The average diameter of a pore. (SSM)
+			porecont	Pore continuity	Average vertical distance through which the minimum diameter of the pore exceeds 0.5mm when the soil layer is moist or wetter.
+			poreshp	Pore shape	A description of the multiaxial shape of the pore.
+			cp.rvindicator	Is representative?	A yes/no field that indicates if a value or row (set of values) is representative for the component.
+structure	chstructgrp	Horizon structure group	chkey	Chorizon key	A non-connotative string of characters used to uniquely identify a record in the Horizon table.
+			structgrpname	Structure	The narrative description of the soil structure within a soil horizon.
+			csg.rvindicator	Is representative?	A yes/no field that indicates if a value or row (set of values) is representative for the component.
+textureclass	chtexturegrp	Horizon texture group	chkey	Chorizon key	A non-connotative string of characters used to uniquely identify a record in the Horizon table.
+			texture	Texture Mod and Class	Name for the concatenation of TEXTURE_MODIFIER and TEXTURE_CLASS.
+			stratextsflag	Is stratified?	A Boolean flag that when set (Y) indicates that the textures that comprise a particular texture group, are stratified.
+			ctg.rvindicator	Is representative?	A yes/no field that indicates if a value or row (set of values) is representative for the component.
+			texdesc	Texture description	The full texture description for a horizon, using full texture class and in lieu of names rather than abbreviations.
+			chtgkey	Chorizon texture group key	A non-connotative string of characters used to uniquely identify a record in the Horizon Texture Group table.
+	chtexture	Horizon texture	chtgkey	Chorizon texture group key	A non-connotative string of characters used to uniquely identify a record in the Horizon Texture Group table.
+			texcl	Texture	An expression, based on the USDA system of particle sizes, for the relative portions of the various size groups of individual mineral grains less than 2mm equivalent diameter in a mass of soil.
+parentmaterial	copmgrp	Component parent material group	cokey	Component key	A non-connotative string of characters used to uniquely identify a record in the Component table.
+			pmgroupname	Parent material group name	Name for the concatenation of PARENT_MATERIAL_MODIFIER, PARENT_MATERIAL_KIND, and PARENT_MATERIAL_ORIGIN for each of the parent materials that may occur in a vertical cross section of a soil.
+			pmg.rvindicator	Is representative?	A yes/no field that indicates if a value or row (set of values) is representative for the component.
+restrictions	corestrictions	Component restrictions	cokey	Component key	A non-connotative string of characters used to uniquely identify a record in the Component table.
+			reskind	Kind of restriction	Type of nearly continuous layer that has one or more physical, chemical, or thermal property(ies) that significantly reduce the movement of water and air through the soil or that otherwise provides an unfavorable root environment.
+			resdept_l	Top depth [low]	The distance from the soil surface to the  upper boundary of the restrictive layer.
+			resdept_r	Top depth [representative]	The distance from the soil surface to the upper boundary of the restrictive layer.
+			resdept_h	Top depth [high]	The distance from the soil surface to the upper boundary of the restrictive layer.
+			resdepb_l	Bottom depth [low]	The distance from the soil surface to the lower boundary of the restrictive layer.
+			resdepb_r	Bottom depth [representative]	The distance from the soil surface to the lower boundary of the restrictive layer.
+			resdepb_h	Bottom depth [high]	The distance from the soil surface to the lower boundary of the restrictive layer.
+			resthk_l	Thickness [low]	The distance from the top to bottom of a restrictive layer.
+			resthk_r	Thickness [representative]	The distance from the top to bottom of a restrictive layer.
+			resthk_h	Thickness [high]	The distance from the top to bottom of a restrictive layer.
+canopycover	cocanopycover	Component canopy cover	cokey	Component key	A non-connotative string of characters used to uniquely identify a record in the Component table.
+			plantcov	Canopy cover [%]	Percent of coverage (canopy) attributed to a specific plant species.
+			plantsym	Plant symbol	A unique symbol used to identify a plant genus or a plant species. (The PLANTS Database, USDA-NRCS, National Plant Data Center.)
+			plantsciname	Scientific name	The full genus and species name as listed in the PLANTS Database, USDA-NRCS, National Plant Data Center.
+			plantcomname	Common name	A generally accepted common name used for a plant in a geographic region, usually a state.
+cropyield	cocropyld	Component crop yield	cokey	Component key	A non-connotative string of characters used to uniquely identify a record in the Component table.
+			cropname	Crop name	The common name for the crop.
+			yldunits	Units	Crop yield units per unit area for the specified crop.
+			nonirryield_l	Non-irrigated yield [low]	The expected yield per acre of the specific crop without supplemental irrigation.
+			nonirryield_r	Non-irrigated yield [representative]	The expected yield per acre of the specific crop without supplemental irrigation.
+			nonirryield_h	Non-irrigated yield [high]	The expected yield per acre of the specific crop without supplemental irrigation.
+			irryield_l	Irrigated yield [low]	The expected yield per acre of the specific crop with irrigation.
+			irryield_r	Irrigated yield [representative]	The expected yield per acre of the specific crop with irrigation.
+			irryield_h	Irrigated yield [high]	The expected yield per acre of the specific crop with irrigation.
+			cropprodindex	Productivity index	An index of the capacity of a soil to produce a specific plant under a defined management system.
+			vasoiprdgrp	VA soil production group	Crop specific groupings of soils indicating potential yields under a high level of management.
+monthlystats	comonth	Component month	cokey	Component key	A non-connotative string of characters used to uniquely identify a record in the Component table.
+			monthseq	Month sequence	An integer number used to sequence the months of the year in their proper order.
+			month	Month	One of the twelve months of the year.
+			flodfreqcl	Flooding frequency	The annual probability of a flood event expressed as a class. (SSM).
+			floddurcl	Flooding duration	Average duration of inundation per flood occurrence and expressed as a class. (NSSH)
+			pondfreqcl	Ponding frequency	The number of times ponding occurs over a period of time. (SSM)
+			ponddurcl	Ponding duration	The average duration, or length of time, of the ponding occurrence. (NSSH)
+			ponddep_l	Ponding depth [low]	The depth of surface water that is ponding on the soil.
+			ponddep_r	Ponding depth [representative]	The depth of surface water that is ponding on the soil.
+			ponddep_h	Ponding depth [high]	The depth of surface water that is ponding on the soil.
+			dlyavgprecip_l	Daily precipitations [low]	The daily average precipitation for the referenced month. Commonly calculated as the total precipitation for the month divided by the number of days in the month. (February nominally has 28 days).
+			dlyavgprecip_r	Daily precipitations [representative]	
+			dlyavgprecip_h	Daily precipirations [high]	
+			dlyavgpotet_l	Daily ET [low]	Daily average potential evapotranspiration for the referenced month.
+			dlyavgpotet_r	Daily ET [representative]	Daily average potential evapotranspiration for the referenced month.
+			dlyavgpotet_h	Daily ET [high]	Daily average potential evapotranspiration for the referenced month.
+			comonthkey	Component month key	A non-connotative string of characters used to uniquely identify a record in the Component Month table.
+	cosoilmoist	Component soil moisture	comonthkey	Component month key	A non-connotative string of characters used to uniquely identify a record in the Component Month table.
+			soimoistdept_l	Top depth [low]	The distance from the top of the soil to the upper boundary of the moisture layer.
+			soimoistdept_r	Top depth [representative]	The distance from the top of the soil to the upper boundary of the moisture layer.
+			soimoistdept_h	Top depth [high]	The distance from the top of the soil to the upper boundary of the moisture layer.
+			soimoistdepb_l	Bottom depth [low]	The distance from the top of the soil to the lower boundary of the moisture layer.
+			soimoistdepb_r	Bottom depth [representative]	The distance from the top of the soil to the lower boundary of the moisture layer.
+			soimoistdepb_h	Bottom depth [high]	The distance from the top of the soil to the lower boundary of the moisture layer.
+			soimoiststat	Moisture status	The mean monthly soil water state at a specified depth.
+	cosoiltemp	Component soil temperature	comonthkey	Component month key	A non-connotative string of characters used to uniquely identify a record in the Component Month table.
+			soitempmm	Monthly temperature	The long-term monthly average of the mean daily soil temperature of the layer for the month in question. Long-term is generally considered to be a 30-year average.
+			soitempdept_l	Top depth [low]	The distance from the top of the soil to the upper boundary of the soil temperature layer.
+			soitempdept_r	Top depth [representative]	The distance from the top of the soil to the upper boundary of the soil temperature layer.
+			soitempdept_h	Top depth [high]	The distance from the top of the soil to the upper boundary of the soil temperature layer.
+			soitempdepb_l	Bottom depth [low]	The distance from the top of the soil to the lower boundary of the soil temperature layer.
+			soitempdepb_r	Bottom depth [representative]	The distance from the top of the soil to the lower boundary of the soil temperature layer.
+			soitempdepb_h	Bottom depth [high]	The distance from the top of the soil to the lower boundary of the soil temperature layer.

@@ -1,0 +1,168 @@
+* {
+  box-sizing: border-box;
+}
+
+body, html {
+  padding: 0;
+  margin: 0;
+}
+
+body, table {
+  font: 13px arial;
+}
+
+table {
+  border: 1px solid black;
+  border-spacing: 0; 
+  empty-cells: show;
+}
+
+td, th {
+  padding: 0.2em 0.5em;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #bbb;
+}
+
+nav {
+  background: #aaa;
+  padding: 0.5em;
+}
+
+#Data td {
+  vertical-align: top;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 20em;
+  overflow: hidden;
+}
+
+#Data th {
+  position: sticky;
+  top: 0;
+  background: #eee;
+}
+
+div.ssurgo {
+  background: #333;
+  color: white;
+  font-weight: bold;
+  padding: 0.5em;
+}
+
+#SSURGO td {
+  vertical-align: top;
+}
+
+#SSURGO a {
+  color: yellow;
+}
+
+#URL {
+  font-size: 110%;
+}
+
+#SSURGO td:nth-child(1),
+#SSURGO td:nth-child(2) {
+  white-space: nowrap;
+}
+
+#Query {
+  height: 20em;
+  width: 100%;
+  overflow: auto;
+  background: #eee;
+  zwidth: auto;
+}
+
+label {
+  cursor: pointer;
+}
+
+label:hover {
+  color: yellow;
+}
+
+td.buttons {
+  text-align: center;
+}
+
+button.selected {
+  background: #dfd;
+}
+
+#Documentation {
+  padding: 0.5em;
+  border: 1px solid #aaa;
+}
+
+#Documentation td {
+  vertical-align: top;
+}
+
+#Dictionary tr:nth-child(1) td {
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid black;
+  background: #ddd;
+  position: sticky;
+  top: -1px;
+  height: 2em;
+  z-index: 100;
+}
+
+#Dictionary tr.sticky td {
+  background: white;
+  border-top: 1px solid black;
+}
+
+#Dictionary td.sticky {
+  position: sticky;
+  top: 2em;
+}
+
+#Dictionary td:nth-child(-n + 3) {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+#Dictionary td:nth-child(4) {
+  border-left: 1px solid black;
+}
+
+h2 {
+  font-size: 110%;
+  color: #246;
+}
+
+.usage {
+  font-weight: bold;
+  font-size: 110%;
+}
+
+#Documentation i {
+  color: brown;
+}
+
+.optional {
+  zcolor: gray;
+}
+
+.indent {
+  margin-left: 3em;
+}
+
+.plus {
+  color: darkgreen;
+}
+
+.minus {
+  color: red;
+}
+
+.hidden {
+  display: none;
+}
+
+#Filter {
+  width: 100%;
+}
