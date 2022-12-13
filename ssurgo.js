@@ -347,7 +347,6 @@ const ssurgo = (req, res) => {
     }
   } // outputData
 
-  console.log(req.query.lat);
   if (!req.query.lat && !req.query.mukey) {
     res.sendFile(__dirname + '/public/index.html');
     return;
