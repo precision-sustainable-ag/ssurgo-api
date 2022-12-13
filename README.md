@@ -14,7 +14,7 @@ The SSURGO API ...
 
 ## Features
 
-The API is documented at https://api.precisionsustainableag.org/ssurgo/
+The API is documented at https://ssurgo.covercrop-data.org/
 
 ## Local Installation Steps
 

@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: ssurgoapi 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ssurgoapi
+  template:
+    metadata:
+      labels:
+        app: ssurgoapi 
+    spec:
+      containers:
+        - name: ssurgoapi 
+          image: containerregistry4pd7i.azurecr.io/ssurgoapi
+          ports:
+          - containerPort: 80

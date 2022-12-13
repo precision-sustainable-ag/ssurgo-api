@@ -16,7 +16,6 @@ $(() => {
 
     $('#Data thead, #Data tbody').empty();
 
-    // let url = `https://api.precisionsustainableag.org/ssurgo?lat=${lat}&lon=${lon}`;
     let url = window.location.origin + `/?lat=${lat}&lon=${lon}`;
     
     if (cats.length) {
