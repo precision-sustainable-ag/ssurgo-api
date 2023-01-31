@@ -1,6 +1,6 @@
 # ssurgo-api
 
-The SSURGO API ...
+This API provides an easy way to query the Soil Survey Geographic Database (SSURGO), without the need to create explicit SQL queries.
 
 ## Table of Contents:
 
@@ -38,4 +38,4 @@ Weather|postgres|<weather server key>
 
 **Date Created:** 11/28/2022
 
-**Date Last Modified:** 11/28/2022
+**Date Last Modified:** 01/31/2023
