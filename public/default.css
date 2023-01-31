@@ -115,9 +115,9 @@ button.selected {
   border-top: 1px solid black;
 }
 
-#Dictionary td.sticky {
+#Dictionary td.sticky, #Dictionary div.sticky {
   position: sticky;
-  top: 2em;
+  top: calc(2em - 1px);
 }
 
 #Dictionary td:nth-child(-n + 3) {
