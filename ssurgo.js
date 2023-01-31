@@ -39,70 +39,76 @@ const ssurgo = (req, res) => {
   } // doFilter
 
   const ssurgo1 = () => {
-    let attr = lat !== 'NULL' ? `${lat} as lat, ${lon} as lon` : 'mukey';
+    const attr = [];
+
+    if (lat !== 'NULL') {
+      attr.push(`${lat} as lat, ${lon} as lon`);
+    } else if (mukey) {
+      attr.push(['mukey']);
+    }
 
     if (test('sacatalog')) {
-      attr += ', sc.areasymbol';
+      attr.push('sc.areasymbol');
     }
 
     if (test('legend')) {
-      attr += ', lg.lkey';
+      attr.push('lg.lkey');
     }
 
     if (test('mapunit')) {
-      attr += ', mu.mukey';
+      attr.push('mu.mukey');
     }
 
     if (test('component|restrictions|horizon')) {
-      attr += ', co.cokey';
+      attr.push('co.cokey');
     }
 
     if (test('horizon|pores|structure|textureclass')) {
-      attr += ', ch.chkey';
+      attr.push('ch.chkey');
     }
 
     if (test('textureclass')) {
-      attr += ', ctg.chtgkey';
+      attr.push('ctg.chtgkey');
     }
 
     if (test('sacatalog')) {
-      attr += ', sc.areaname, saverest, mbrminx, mbrminy, mbrmaxx, mbrmaxy';
+      attr.push('sc.areaname, saverest, mbrminx, mbrminy, mbrmaxx, mbrmaxy');
     }
 
     if (test('legend')) {
-      attr += ', areaacres, projectscale';
+      attr.push('areaacres, projectscale');
     }
 
     if (test('mapunit')) {
-      attr += ', musym, muname, mukind, muacres, farmlndcl, iacornsr';  
+      attr.push('musym, muname, mukind, muacres, farmlndcl, iacornsr');
     }
 
     if (test('component')) {
-      attr += ', comppct_l, comppct_r, comppct_h, compname, compkind, majcompflag, slope_l, slope_r, slope_h, slopelenusle_l, slopelenusle_r, slopelenusle_h, runoff, erocl, hydricrating, hydricon, drainagecl, elev_l, elev_r, elev_h, geomdesc, map_l, map_r, map_h, ffd_l, ffd_r, ffd_h, frostact, hydgrp, taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp, taxpartsize, taxpartsizemod, taxceactcl, taxreaction, taxtempcl, taxmoistscl, taxtempregime, soiltaxedition';
+      attr.push('comppct_l, comppct_r, comppct_h, compname, compkind, majcompflag, slope_l, slope_r, slope_h, slopelenusle_l, slopelenusle_r, slopelenusle_h, runoff, erocl, hydricrating, hydricon, drainagecl, elev_l, elev_r, elev_h, geomdesc, map_l, map_r, map_h, ffd_l, ffd_r, ffd_h, frostact, hydgrp, taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp, taxpartsize, taxpartsizemod, taxceactcl, taxreaction, taxtempcl, taxmoistscl, taxtempregime, soiltaxedition');
     }
 
     if (test('horizon')) {
-      attr += ', hzname, desgndisc, desgnmaster, desgnmasterprime, desgnvert, hzdept_l, hzdept_r, hzdept_h, hzdepb_l, hzdepb_r, hzdepb_h, hzthk_l, hzthk_r, hzthk_h, fraggt10_l, fraggt10_r, fraggt10_h, frag3to10_l, frag3to10_r, frag3to10_h, sieveno4_l, sieveno4_r, sieveno4_h, sieveno10_l, sieveno10_r, sieveno10_h, sieveno40_l, sieveno40_r, sieveno40_h, sieveno200_l, sieveno200_r, sieveno200_h, sandtotal_l, sandtotal_r, sandtotal_h, sandvc_l, sandvc_r, sandvc_h, sandco_l, sandco_r, sandco_h, sandmed_l, sandmed_r, sandmed_h, sandfine_l, sandfine_r, sandfine_h, sandvf_l, sandvf_r, sandvf_h, silttotal_l, silttotal_r, silttotal_h, siltco_l, siltco_r, siltco_h, siltfine_l, siltfine_r, siltfine_h, claytotal_l, claytotal_r, claytotal_h, claysizedcarb_l, claysizedcarb_r, claysizedcarb_h, om_l, om_r, om_h, dbtenthbar_r, dbtenthbar_h, dbthirdbar_l, dbthirdbar_r, dbthirdbar_h, dbfifteenbar_l, dbfifteenbar_r, dbfifteenbar_h, dbovendry_l, dbovendry_r, dbovendry_h, partdensity, ksat_l, ksat_r, ksat_h, awc_l, awc_r, awc_h, wtenthbar_l, wtenthbar_r, wtenthbar_h, wthirdbar_l, wthirdbar_r, wthirdbar_h, wfifteenbar_l, wfifteenbar_r, wfifteenbar_h, wsatiated_l, wsatiated_r, wsatiated_h, ll_l, ll_r, ll_h, pi_l, pi_r, pi_h, kwfact, kffact, caco3_l, caco3_r, caco3_h, gypsum_l, gypsum_r, gypsum_h, sar_l, sar_r, sar_h, ec_l, ec_r, ec_h, cec7_l, cec7_r, cec7_h, ecec_l, ecec_r, ecec_h, sumbases_l, sumbases_r, sumbases_h, ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h, ph01mcacl2_l, ph01mcacl2_r, ph01mcacl2_h, pbray1_l, pbray1_r, pbray1_h, poxalate_l, poxalate_r, poxalate_h, ph2osoluble_l, ph2osoluble_r, ph2osoluble_h, ptotal_l, ptotal_r, ptotal_h';
+      attr.push('hzname, desgndisc, desgnmaster, desgnmasterprime, desgnvert, hzdept_l, hzdept_r, hzdept_h, hzdepb_l, hzdepb_r, hzdepb_h, hzthk_l, hzthk_r, hzthk_h, fraggt10_l, fraggt10_r, fraggt10_h, frag3to10_l, frag3to10_r, frag3to10_h, sieveno4_l, sieveno4_r, sieveno4_h, sieveno10_l, sieveno10_r, sieveno10_h, sieveno40_l, sieveno40_r, sieveno40_h, sieveno200_l, sieveno200_r, sieveno200_h, sandtotal_l, sandtotal_r, sandtotal_h, sandvc_l, sandvc_r, sandvc_h, sandco_l, sandco_r, sandco_h, sandmed_l, sandmed_r, sandmed_h, sandfine_l, sandfine_r, sandfine_h, sandvf_l, sandvf_r, sandvf_h, silttotal_l, silttotal_r, silttotal_h, siltco_l, siltco_r, siltco_h, siltfine_l, siltfine_r, siltfine_h, claytotal_l, claytotal_r, claytotal_h, claysizedcarb_l, claysizedcarb_r, claysizedcarb_h, om_l, om_r, om_h, dbtenthbar_r, dbtenthbar_h, dbthirdbar_l, dbthirdbar_r, dbthirdbar_h, dbfifteenbar_l, dbfifteenbar_r, dbfifteenbar_h, dbovendry_l, dbovendry_r, dbovendry_h, partdensity, ksat_l, ksat_r, ksat_h, awc_l, awc_r, awc_h, wtenthbar_l, wtenthbar_r, wtenthbar_h, wthirdbar_l, wthirdbar_r, wthirdbar_h, wfifteenbar_l, wfifteenbar_r, wfifteenbar_h, wsatiated_l, wsatiated_r, wsatiated_h, ll_l, ll_r, ll_h, pi_l, pi_r, pi_h, kwfact, kffact, caco3_l, caco3_r, caco3_h, gypsum_l, gypsum_r, gypsum_h, sar_l, sar_r, sar_h, ec_l, ec_r, ec_h, cec7_l, cec7_r, cec7_h, ecec_l, ecec_r, ecec_h, sumbases_l, sumbases_r, sumbases_h, ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h, ph01mcacl2_l, ph01mcacl2_r, ph01mcacl2_h, pbray1_l, pbray1_r, pbray1_h, poxalate_l, poxalate_r, poxalate_h, ph2osoluble_l, ph2osoluble_r, ph2osoluble_h, ptotal_l, ptotal_r, ptotal_h');
     }
 
     if (test('textureclass')) {
-      attr += ', texture, stratextsflag, ctg.rvindicator, texdesc, texcl';
+      attr.push('texture, stratextsflag, ctg.rvindicator, texdesc, texcl');
     }
 
     if (test('pores')) {
-      attr += ', poreqty_l, poreqty_r, poreqty_h, poresize, porecont, poreshp, cp.rvindicator';
+      attr.push('poreqty_l, poreqty_r, poreqty_h, poresize, porecont, poreshp, cp.rvindicator');
     }
 
     if (test('structure')) {
-      attr += ', structgrpname, csg.rvindicator';
+      attr.push('structgrpname, csg.rvindicator');
     }
 
     if (test('parentmaterial')) {
-      attr += ', pmgroupname, pmg.rvindicator';
+      attr.push('pmgroupname, pmg.rvindicator');
     }
 
     if (test('restrictions')) {
-      attr += ', reskind, resdept_l, resdept_r, resdept_h, resdepb_l, resdepb_r, resdepb_h, resthk_l, resthk_r, resthk_h';
+      attr.push('reskind, resdept_l, resdept_r, resdept_h, resdepb_l, resdepb_r, resdepb_h, resthk_l, resthk_r, resthk_h');
     }
 
     query1 = `SELECT DISTINCT ${attr}
@@ -152,38 +158,44 @@ const ssurgo = (req, res) => {
   } // ssurgo1
 
   const ssurgo2 = () => {
-    let attr = lat !== 'NULL' ? `${lat} as lat, ${lon} as lon` : 'mukey';
+    const attr = [];
+
+    if (lat !== 'NULL') {
+      attr.push(`${lat} as lat, ${lon} as lon`);
+    } else if (mukey) {
+      attr.push(['mukey']);
+    }
 
     if (test('sacatalog')) {
-      attr += ', sc.areasymbol';
+      attr.push('sc.areasymbol');
     }
 
     if (test('legend')) {
-      attr += ', lg.lkey';
+      attr.push('lg.lkey');
     }
 
     if (test('mapunit')) {
-      attr += ', mu.mukey';
+      attr.push('mu.mukey');
     }
 
     if (test('component|canopycover|cropyield|monthlystats')) {
-      attr += ', co.cokey';
+      attr.push('co.cokey');
     }
 
     if (test('monthlystats')) {
-      attr += ', mo.comonthkey';
+      attr.push('mo.comonthkey');
     }
 
     if (test('canopycover')) {
-      attr += ', plantcov, plantsym, plantsciname, plantcomname';
+      attr.push('plantcov, plantsym, plantsciname, plantcomname');
     }
 
     if (test('cropyield')) {
-      attr += ', cropname, yldunits, nonirryield_l, nonirryield_r, nonirryield_h, irryield_l, irryield_r, irryield_h, yld.cropprodindex, vasoiprdgrp';
+      attr.push('cropname, yldunits, nonirryield_l, nonirryield_r, nonirryield_h, irryield_l, irryield_r, irryield_h, yld.cropprodindex, vasoiprdgrp');
     }
 
     if (test('monthlystats')) {
-      attr += ', monthseq, month, flodfreqcl, floddurcl, pondfreqcl, ponddurcl, ponddep_l, ponddep_r, ponddep_h, dlyavgprecip_l, dlyavgprecip_r, dlyavgprecip_h, dlyavgpotet_l, dlyavgpotet_r, dlyavgpotet_h, soimoistdept_l, soimoistdept_r, soimoistdept_h, soimoistdepb_l, soimoistdepb_r, soimoistdepb_h, soimoiststat, soitempmm, soitempdept_l, soitempdept_r, soitempdept_h, soitempdepb_l, soitempdepb_r, soitempdepb_h';
+      attr.push('monthseq, month, flodfreqcl, floddurcl, pondfreqcl, ponddurcl, ponddep_l, ponddep_r, ponddep_h, dlyavgprecip_l, dlyavgprecip_r, dlyavgprecip_h, dlyavgpotet_l, dlyavgpotet_r, dlyavgpotet_h, soimoistdept_l, soimoistdept_r, soimoistdept_h, soimoistdepb_l, soimoistdepb_r, soimoistdepb_h, soimoiststat, soitempmm, soitempdept_l, soitempdept_r, soitempdept_h, soitempdepb_l, soitempdepb_r, soitempdepb_h');
     }
 
     query2 = `SELECT DISTINCT ${attr}
