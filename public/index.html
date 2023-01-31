@@ -86,9 +86,14 @@
             <p>Example: <strong>&filter=hzname='A',comppct_r>20,month='August'</strong></p>
 
     <tr><td><p>&mukey=<i>mukey1[,mukey2,&hellip;]
-        <td><p>A comma-separated list of mukeys.  (You can use mukeys in place of lat/lon.)</p>
+        <td><p>A comma-separated list of mukeys.  (You can use <strong>mukeys</strong> in place of <strong>lat/lon</strong>.)</p>
             <p>Example: <strong>&mukey=2455277,289215,161545</strong></p>
 
+    <tr><td><p>&polygon=<i>lon lat, lon lat, lon lat[,lon lat,&hellip;]
+      <td><p>A comma-separated list of longitudes and latitudes.  (You can use <strong>polygon</strong> in place of <strong>lat/lon</strong>.)</p>
+          <p>Example: <strong>&polygon=-76.8301 38.9651,-76.8304 38.9653,-76.8308 38.9656,-76.8311 38.9656,-76.8301 38.9651</strong></p>
+          <p>Note:  If the polygon isn't closed, the API will close it for you.</p>
+      
     <tr><td><p>&component=major</p>
         <td><p>Output major component only.</p>
 
