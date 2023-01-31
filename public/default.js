@@ -162,6 +162,8 @@ $(() => {
           $('td', $tr).css('background', colors[c % colors.length]);
         }
       });
+
+      $('td.sticky').html((_, html) => `<div class="sticky">${html}</div>`);
     }
   );
 

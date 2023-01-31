@@ -2,13 +2,6 @@ const {pool} = require('./pools');
 
 const axios = require('axios');
 
-let lats;
-let lons;
-let cols;
-let minLat;
-let maxLat;
-let minLon;
-let maxLon;
 let rect;
 let location;
 let options;
@@ -17,7 +10,6 @@ let output;
 const init = (req) => {
   output = req.query.explain ? 'json' : req.query.output || 'json';
 
-  lats = lons = cols = minLat = maxLat = minLon = maxLon = null;
   location = req.query.location;
   options = (req.query.options || '').toLowerCase().split(',');
   rect = options.includes('rect') && (location || (req.query.lat || '').split(',').length == 2);
