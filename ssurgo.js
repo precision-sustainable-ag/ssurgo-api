@@ -6,6 +6,7 @@ let rect;
 let location;
 let options;
 let output;
+let where;
 
 const init = (req) => {
   output = req.query.explain ? 'json' : req.query.output || 'json';
@@ -38,7 +39,7 @@ const ssurgo = (req, res) => {
   } // doFilter
 
   const ssurgo1 = () => {
-    let attr = lat ? `${lat} as lat, ${lon} as lon` : 'mukey';
+    let attr = lat !== 'NULL' ? `${lat} as lat, ${lon} as lon` : 'mukey';
 
     if (test('sacatalog')) {
       attr += ', sc.areasymbol';
@@ -117,7 +118,7 @@ const ssurgo = (req, res) => {
               ${test('parentmaterial')                                                              ? 'FULL OUTER JOIN copmgrp        pmg ON co.cokey      = pmg.cokey'      : ''}
               ${test('restrictions')                                                                ? 'FULL OUTER JOIN corestrictions rt  ON co.cokey      = rt.cokey'       : ''}
               WHERE mu.mukey IN (
-                ${mukey ? mukey : `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`}
+                ${where}
               )
               ${req.query.showseriesonly == 'false' ? '' : test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass') ? `AND compkind='Series' ` : ''}
              `;
@@ -151,7 +152,7 @@ const ssurgo = (req, res) => {
   } // ssurgo1
 
   const ssurgo2 = () => {
-    let attr = lat ? `${lat} as lat, ${lon} as lon` : 'mukey';
+    let attr = lat !== 'NULL' ? `${lat} as lat, ${lon} as lon` : 'mukey';
 
     if (test('sacatalog')) {
       attr += ', sc.areasymbol';
@@ -196,7 +197,7 @@ const ssurgo = (req, res) => {
               ${test('monthlystats')                                  ? 'FULL OUTER JOIN cosoilmoist    moist ON mo.comonthkey  = moist.comonthkey' : ''}
               ${test('monthlystats')                                  ? 'FULL OUTER JOIN cosoiltemp     temp  ON mo.comonthkey  = temp.comonthkey'  : ''}
               WHERE mu.mukey IN (
-                ${mukey ? mukey : `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`}
+                ${where}
               )
               
 
@@ -339,7 +340,7 @@ const ssurgo = (req, res) => {
     }
   } // outputData
 
-  if (!req.query.lat && !req.query.mukey) {
+  if (!req.query.lat && !req.query.mukey && !req.query.polygon) {
     res.sendFile(__dirname + '/public/index.html');
     return;
   }
@@ -352,6 +353,15 @@ const ssurgo = (req, res) => {
 
   const lat       = req.query.lat ? (+req.query.lat).toFixed(4) : 'NULL';
   const lon       = req.query.lon ? (+req.query.lon).toFixed(4) : 'NULL';
+  
+  let polygon     = req.query.polygon;
+  if (polygon) {
+    polygon = polygon.split(',');
+    if (polygon[0] !== polygon.slice(-1)[0]) {
+      polygon.push(polygon[0]);
+    }
+  }
+
   const mukey     = req.query.mukey ? req.query.mukey.split(',').map(m => `'${m}'`).join(',') : null;
   const output    = req.query.output || 'json';
   const filter    = (req.query.filter || '').split(',');
@@ -371,10 +381,20 @@ const ssurgo = (req, res) => {
     comonth         : ['cokey', 'monthseq', 'month', 'flodfreqcl', 'floddurcl', 'pondfreqcl', 'ponddurcl', 'ponddep_l', 'ponddep_r', 'ponddep_h', 'dlyavgprecip_l', 'dlyavgprecip_r', 'dlyavgprecip_h', 'dlyavgpotet_l', 'dlyavgpotet_r', 'dlyavgpotet_h', 'comonthkey', 'comonthkey', 'soimoistdept_l', 'soimoistdept_r', 'soimoistdept_h', 'soimoistdepb_l', 'soimoistdepb_r', 'soimoistdepb_h', 'soimoiststat', 'comonthkey', 'soitempmm', 'soitempdept_l', 'soitempdept_r', 'soitempdept_h', 'soitempdepb_l', 'soitempdepb_r', 'soitempdepb_h']
   };
 
+  let where;
+
+  if (mukey) {
+    where = mukey;
+  } else if (polygon) {
+    where = `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')`;
+  } else {
+    where = `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
+  }
+
   init(req);
 
-  if ((!+lat || !+lon) && !mukey) {
-    res.status(200).send('lat and lon required');
+  if ((!+lat || !+lon) && !mukey && !polygon) {
+    res.status(400).send('lat/lon, mukey, or polygon required');
     return;
   }
   
