@@ -2,10 +2,8 @@ const {pool} = require('./pools');
 
 const axios = require('axios');
 
-let rect;
 let location;
 let options;
-let output;
 let where;
 
 const init = (req) => {
@@ -13,7 +11,6 @@ const init = (req) => {
 
   location = req.query.location;
   options = (req.query.options || '').toLowerCase().split(',');
-  rect = options.includes('rect') && (location || (req.query.lat || '').split(',').length == 2);
 } // init
 
 const ssurgo = (req, res) => {
@@ -277,6 +274,10 @@ const ssurgo = (req, res) => {
 
   const outputData = () => {
     const data = [];
+    if (data1.length > 1000) {
+      res.status(400).send({ERROR: 'Too many rows'});
+      return;
+    }
 
     if (!data1.length || !data2.length) {
       if (req.callback) {
@@ -363,10 +364,10 @@ const ssurgo = (req, res) => {
   let query2;
   const jdata = [];
 
-  const lat       = req.query.lat ? (+req.query.lat).toFixed(4) : 'NULL';
-  const lon       = req.query.lon ? (+req.query.lon).toFixed(4) : 'NULL';
+  const lat   = req.query.lat ? (+req.query.lat).toFixed(4) : 'NULL';
+  const lon   = req.query.lon ? (+req.query.lon).toFixed(4) : 'NULL';
   
-  let polygon     = req.query.polygon;
+  let polygon = req.query.polygon;
   if (polygon) {
     polygon = polygon.split(',');
     if (polygon[0] !== polygon.slice(-1)[0]) {
@@ -392,8 +393,6 @@ const ssurgo = (req, res) => {
     cocropyld       : ['cokey', 'cropname', 'yldunits', 'nonirryield_l', 'nonirryield_r', 'nonirryield_h', 'irryield_l', 'irryield_r', 'irryield_h', 'cropprodindex', 'vasoiprdgrp'],
     comonth         : ['cokey', 'monthseq', 'month', 'flodfreqcl', 'floddurcl', 'pondfreqcl', 'ponddurcl', 'ponddep_l', 'ponddep_r', 'ponddep_h', 'dlyavgprecip_l', 'dlyavgprecip_r', 'dlyavgprecip_h', 'dlyavgpotet_l', 'dlyavgpotet_r', 'dlyavgpotet_h', 'comonthkey', 'comonthkey', 'soimoistdept_l', 'soimoistdept_r', 'soimoistdept_h', 'soimoistdepb_l', 'soimoistdepb_r', 'soimoistdepb_h', 'soimoiststat', 'comonthkey', 'soitempmm', 'soitempdept_l', 'soitempdept_r', 'soitempdept_h', 'soitempdepb_l', 'soitempdepb_r', 'soitempdepb_h']
   };
-
-  let where;
 
   if (mukey) {
     where = mukey;
