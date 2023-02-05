@@ -131,6 +131,7 @@ const ssurgo = (req, res) => {
     }
 
     query1 = doFilter(query1);
+    console.log('query1');
 
     if (output != 'query') {
       axios
@@ -140,12 +141,15 @@ const ssurgo = (req, res) => {
           encode: 'form'
         })
         .then(data => {
+          console.log(data);
           data1 = data.data.Table || [];
           if (data2) {
             outputData();
           }
         })
         .catch(error => {
+          console.log('ssurgo', 'ERROR:', error.stack); //.split('\n')[4]);
+          console.log('ssurgo', query1);
           console.error('ssurgo', 'ERROR:', error.stack); //.split('\n')[4]);
           console.error('ssurgo', query1);
           res.status(400).send(error);
@@ -214,6 +218,7 @@ const ssurgo = (req, res) => {
 
     query2 = doFilter(query2);
 
+    console.log('query2');
     if (output == 'query') {
       res.status(200).send(query1 + '\n' + '_'.repeat(80) + '\n' + query2);
     } else {
@@ -230,6 +235,8 @@ const ssurgo = (req, res) => {
           }
         })
         .catch(error => {
+          console.log('ssurgo', 'ERROR:', error.stack); //.split('\n')[4]);
+          console.log('ssurgo', query2);
           console.error('ssurgo', 'ERROR:', error.stack); //.split('\n')[4]);
           console.error('ssurgo', query2);
           res.status(400).send(error);
@@ -283,7 +290,7 @@ const ssurgo = (req, res) => {
       if (req.callback) {
         req.callback([]);
       } else {
-        // res.status(400).send({ERROR: 'No data found'});
+        res.status(400).send({ERROR: 'No data found'});
       }
     } else {
       let i = -1;
