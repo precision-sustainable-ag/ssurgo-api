@@ -283,7 +283,7 @@ const ssurgo = (req, res) => {
       if (req.callback) {
         req.callback([]);
       } else {
-        res.status(400).send({ERROR: 'No data found'});
+        // res.status(400).send({ERROR: 'No data found'});
       }
     } else {
       let i = -1;
@@ -366,13 +366,23 @@ const ssurgo = (req, res) => {
 
   const lat   = req.query.lat ? (+req.query.lat).toFixed(4) : 'NULL';
   const lon   = req.query.lon ? (+req.query.lon).toFixed(4) : 'NULL';
+  let minlat;
+  let maxlat;
+  let minlon;
+  let maxlon;
   
   let polygon = req.query.polygon;
   if (polygon) {
-    polygon = polygon.split(',');
+    polygon = polygon.split(/\s*,\s*/);
     if (polygon[0] !== polygon.slice(-1)[0]) {
       polygon.push(polygon[0]);
     }
+    // console.log(JSON.stringify(polygon, null, 2));
+    minlon = Math.min(...polygon.map(p => +(p.split(' ')[0].trim())));
+    minlat = Math.min(...polygon.map(p => +(p.split(' ')[1].trim())));
+    maxlon = Math.max(...polygon.map(p => +(p.split(' ')[0].trim())));
+    maxlat = Math.max(...polygon.map(p => +(p.split(' ')[1].trim())));
+    console.log({minlon, minlat, maxlon, maxlat});
   }
 
   const mukey     = req.query.mukey ? req.query.mukey.split(',').map(m => `'${m}'`).join(',') : null;
@@ -398,6 +408,23 @@ const ssurgo = (req, res) => {
     where = mukey;
   } else if (polygon) {
     where = `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')`;
+
+    /*
+      where = `
+        SELECT a.mukey FROM
+        SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${minlon} ${minlat}, ${minlon} ${maxlat}, ${maxlon} ${maxlat}, ${maxlon} ${minlat}, ${minlon} ${minlat}))') a
+        INNER JOIN
+        SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))') b
+        on a.mukey = b.mukey
+      `;
+
+      where = `
+        SELECT mukey
+        FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')
+        where mukey='123'
+      `;
+      console.log(where);
+    */
   } else {
     where = `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
   }
