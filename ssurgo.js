@@ -409,20 +409,22 @@ const ssurgo = (req, res) => {
   } else if (polygon) {
     where = `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')`;
 
-    where = `
-      SELECT a.mukey FROM
-      SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${minlon} ${minlat}, ${minlon} ${maxlat}, ${maxlon} ${maxlat}, ${maxlon} ${minlat}, ${minlon} ${minlat}))') a
-      INNER JOIN
-      SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))') b
-      on a.mukey = b.mukey
-    `;
+    /*
+      where = `
+        SELECT a.mukey FROM
+        SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${minlon} ${minlat}, ${minlon} ${maxlat}, ${maxlon} ${maxlat}, ${maxlon} ${minlat}, ${minlon} ${minlat}))') a
+        INNER JOIN
+        SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))') b
+        on a.mukey = b.mukey
+      `;
 
-    where = `
-      SELECT mukey
-      FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')
-      where mukey='123'
-    `;
-    console.log(where);
+      where = `
+        SELECT mukey
+        FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')
+        where mukey='123'
+      `;
+      console.log(where);
+    */
   } else {
     where = `SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
   }
