@@ -139,7 +139,7 @@ const ssurgo = (req, res) => {
           encode: 'form'
         })
         .then(data => {
-          console.log(data);
+          // console.log(data);
           data1 = data.data.Table || [];
           if (data2) {
             outputData();
@@ -251,6 +251,8 @@ const ssurgo = (req, res) => {
         res.status(200).send(jdata);
       }
     } else if (output == 'csv') {
+      res.set('Content-Type', 'text/csv');
+      res.setHeader('Content-disposition', `attachment; filename=SSURGO.csv`);
       const result = data.map(d => 
                        d.map(d => (d || '').replace(/^.*,.*$/g, s => `"${s}"`))
                        .join(',')
