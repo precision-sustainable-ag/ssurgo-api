@@ -40,8 +40,6 @@ const ssurgo = (req, res) => {
 
     if (lat !== 'NULL') {
       attr.push(`${lat} as lat, ${lon} as lon`);
-    } else if (mukey) {
-      attr.push(['mukey']);
     }
 
     if (test('sacatalog')) {
@@ -125,7 +123,7 @@ const ssurgo = (req, res) => {
               )
               ${req.query.showseriesonly == 'false' ? '' : test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass') ? `AND compkind='Series' ` : ''}
              `;
-
+    
     if (/^\s*(major|max)\s*$/.test(req.query.component)) {
       query1 += ` and majcompflag='Yes'`;
     }
@@ -163,8 +161,6 @@ const ssurgo = (req, res) => {
 
     if (lat !== 'NULL') {
       attr.push(`${lat} as lat, ${lon} as lon`);
-    } else if (mukey) {
-      attr.push(['mukey']);
     }
 
     if (test('sacatalog')) {
