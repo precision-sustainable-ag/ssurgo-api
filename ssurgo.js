@@ -262,7 +262,21 @@ const ssurgo = (req, res) => {
       res.status(200).send(result);
     } else if (output == 'html') {
       const s = `
-        <link rel="stylesheet" href="css/weather.css">
+        <style>
+          table {
+            border: 1px solid black;
+            border-spacing: 0; 
+            empty-cells: show;
+            white-space: nowrap;
+            font: 13px arial;
+          }
+
+          td, th {
+            padding: 0.2em 0.5em;
+            border-right: 1px solid #ddd;
+            border-bottom: 1px solid #bbb;
+          }
+        </style>
         <table id="Data">
           <thead>
             <tr><th>${data[0].join('<th>')}
