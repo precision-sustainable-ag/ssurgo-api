@@ -2,15 +2,10 @@ const {pool} = require('./pools');
 
 const axios = require('axios');
 
-let location;
-let options;
 let where;
 
 const init = (req) => {
   output = req.query.explain ? 'json' : req.query.output || 'json';
-
-  location = req.query.location;
-  options = (req.query.options || '').toLowerCase().split(',');
 } // init
 
 const ssurgo = (req, res) => {
@@ -496,8 +491,78 @@ const ssurgo = (req, res) => {
     ssurgo1();
     ssurgo2();
   }
-} // ssurgo
+}; // ssurgo
+
+const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
+  const { lat, lon } = req.query;
+  const query = `
+    SELECT ${lon} as lon, ${lat} as lat, mukey, mupolygongeo
+    FROM mupolygon
+    WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(${lon} ${lat})', 4326)) = 1;
+  `;
+
+  axios
+    .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+      query,
+      format: 'JSON',
+      encode: 'form'
+    })
+    .then(data => {
+      console.log(data.data.Table);
+      const result = (data.data.Table || []).map(d => {
+        const [lon, lat, mukey, polygon, polygonarray] = d;
+        return {
+          lon,
+          lat,
+          mukey,
+          polygon,
+          polygonarray,
+        };
+      });
+
+      res.send(result);
+    })
+    .catch(error => {
+      console.log('ssurgo', 'ERROR:', error.stack); //.split('\n')[4]);
+      console.log('ssurgo', query);
+      console.error('ssurgo', 'ERROR:', error.stack); //.split('\n')[4]);
+      console.error('ssurgo', query);
+      res.status(400).send(error);
+    }
+  );
+}; // polygon
+
+const polygonInhouse = (req, res) => {
+  const { lat, lon } = req.query;
+  const query = `
+    SELECT
+      ${lon} as lon,
+      ${lat} as lat,
+      mukey,
+      ST_AsText(ST_Transform(shape, 4326)) as polygon,
+      (ST_AsGeoJSON(ST_Multi(ST_Transform(shape, 4326)))::jsonb->'coordinates') as polygonarray
+    FROM
+      ssurgo.mupolygon
+    WHERE
+      ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
+  `;
+
+  pool.query(
+    query,
+    (error, results) => {
+      if (error) {
+        console.log(error);
+        res.status(400).send(error);
+      } else {
+        console.log(results.rows);
+        res.send(results.rows);
+      }
+    }
+  );
+}; // polygonInhouse
 
 module.exports = {
   ssurgo,
+  polygon,
+  polygonInhouse,
 }
