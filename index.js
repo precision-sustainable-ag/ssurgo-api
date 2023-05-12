@@ -28,6 +28,9 @@ app.get('/', (req, res) => {
   ssurgo.ssurgo(req, res);
 });
 
+app.all('/polygon', ssurgo.polygon);
+app.all('/polygoninhouse', ssurgo.polygonInhouse);
+
 app.use(express.static(path.join(__dirname, 'public')));  // make the public folder available
 
 app.use(express.static(__dirname + '/static', {dotfiles: 'allow' }));  // from Ayaan
