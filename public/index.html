@@ -18,10 +18,19 @@
     <table>
       <tr><td>Latitude  <td><input id="Lat" type="text" value="39.032056">
           <td rowspan="4">
-            These queries will be sent to the USDA server:
+            These queries will be sent to the <span class="server">PSA</span> server:
             <br>
             <textarea id="Query" cols="10000"></textarea>
       <tr><td>Longitude <td><input id="Lon" type="text" value="-76.873972">
+      <tr>
+        <td>Server</td>
+        <td>
+          <select title="Server" id="Server">
+            <option value="usda">USDA</option>
+            <option value="psa" selected>PSA</option>
+          </select>
+        </td>
+      </tr>
       <tr id="Categories">
         <td>
           <p>Default categories:</p>
@@ -112,6 +121,5 @@
 
   <hr>
   <h2>Data Dictionary</h2>
-  <table id="Dictionary">
-  </table>
+  <table id="Dictionary"></table>
 </div>

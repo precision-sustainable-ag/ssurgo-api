@@ -7,9 +7,10 @@ const ssurgo = (req, res) => {
   let data2;
   let query1;
   let query2;
-  const inhouse = req.query.inhouse === 'true';
-  const prefix = inhouse ? 'ssurgo.' : '';
-  const joinType = inhouse ? 'LEFT' : 'FULL OUTER';
+  const server = req.query.server || 'usda';
+  const psa = server === 'psa';
+  const prefix = psa ? 'ssurgo.' : '';
+  const joinType = psa ? 'FULL OUTER' : 'FULL OUTER';
 
   const jdata = [];
 
@@ -18,7 +19,7 @@ const ssurgo = (req, res) => {
   let minlon;
   let maxlon;
 
-  const mukey = req.query.mukey ? req.query.mukey.split(',').map((m) => `'${m}'`).join(',') : null;
+  let mukey = req.query.mukey ? req.query.mukey.split(',').map((m) => `'${m}'`).join(',') : null;
   const output = req.query.output || 'json';
 
   let cats = [
@@ -364,7 +365,10 @@ const ssurgo = (req, res) => {
       SELECT DISTINCT ${attr}
       FROM ${prefix}sacatalog sc
       ${joinType} JOIN ${prefix}legend lg ON sc.areasymbol = lg.areasymbol
-      ${joinType} JOIN ${prefix}mapunit mu ON lg.lkey = mu.lkey
+      ${joinType} JOIN (
+        SELECT * FROM ${prefix}mapunit
+        WHERE mukey in (${mukey})
+      ) mu ON lg.lkey = mu.lkey
       ${joinComponent}
       ${test('horizon|pores|structure|textureclass') ? `${joinType} JOIN ${prefix}chorizon ch ON co.cokey = ch.cokey` : ''}
       ${test('pores') ? `${joinType} JOIN ${prefix}chpores cp ON ch.chkey = cp.chkey` : ''}
@@ -373,7 +377,6 @@ const ssurgo = (req, res) => {
       ${test('textureclass') ? `${joinType} JOIN ${prefix}chtexture ct ON ctg.chtgkey = ct.chtgkey` : ''}
       ${test('parentmaterial') ? `${joinType} JOIN ${prefix}copmgrp pmg ON co.cokey = pmg.cokey` : ''}
       ${test('restrictions') ? `${joinType} JOIN ${prefix}corestrictions rt ON co.cokey = rt.cokey` : ''}
-      ${inhouse ? 'LEFT JOIN (select shape, mukey from ssurgo.mupolygon) po ON mu.mukey = po.mukey' : ''}
       ${where}
       ${seriesOnly}
     `;
@@ -384,10 +387,10 @@ const ssurgo = (req, res) => {
 
     query1 = doFilter(query1);
     console.log('query1');
+    console.log(query1);
 
     if (output !== 'query') {
-      if (inhouse) {
-        console.log(query1);
+      if (psa) {
         pool.query(
           query1,
           (error, results) => {
@@ -414,7 +417,7 @@ const ssurgo = (req, res) => {
           .then((data) => {
             // console.log(data);
             data1 = data.data.Table || [];
-            console.log(data1);
+            // console.log(data1);
             if (data2) {
               outputData();
             }
@@ -479,24 +482,27 @@ const ssurgo = (req, res) => {
       SELECT DISTINCT ${attr}
       FROM ${prefix}sacatalog sc
       ${joinType} JOIN ${prefix}legend lg ON sc.areasymbol = lg.areasymbol
-      ${joinType} JOIN ${prefix}mapunit mu ON lg.lkey = mu.lkey
+      ${joinType} JOIN (
+        SELECT * FROM ${prefix}mapunit
+        WHERE mukey in (${mukey})
+      ) mu ON lg.lkey = mu.lkey
       ${test('component|canopycover|cropyield|monthlystats') ? `${joinType} JOIN ${prefix}component co ON mu.mukey = co.mukey` : ''}
       ${test('canopycover') ? `${joinType} JOIN ${prefix}cocanopycover cov ON co.cokey = cov.cokey` : ''}
       ${test('cropyield') ? `${joinType} JOIN ${prefix}cocropyld yld ON co.cokey = yld.cokey` : ''}
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}comonth mo ON co.cokey = mo.cokey` : ''}
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoilmoist moist ON mo.comonthkey = moist.comonthkey` : ''}
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoiltemp temp ON mo.comonthkey = temp.comonthkey` : ''}
-      ${inhouse ? 'LEFT JOIN (select shape, mukey from ssurgo.mupolygon) po ON mu.mukey = po.mukey' : ''}
       ${where}
     `;
 
     query2 = doFilter(query2);
 
     console.log('query2');
+    console.log(query2);
+
     if (output === 'query') {
       res.status(200).send(`${query1}\n${'_'.repeat(80)}\n${query2}`);
-    } else if (inhouse) {
-      console.log(query2);
+    } else if (psa) {
       pool.query(
         query2,
         (error, results) => {
@@ -583,12 +589,8 @@ const ssurgo = (req, res) => {
       `;
       console.log(where);
     */
-  } else if (inhouse) {
-    where = `WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))`;
   } else {
-    where = `WHERE mu.mukey IN (
-      SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')
-    )`;
+    where = 'WHERE mu.mukey IS NOT NULL';
   }
 
   if ((!+lat || !+lon) && !mukey && !polygon) {
@@ -627,9 +629,46 @@ const ssurgo = (req, res) => {
         }
       },
     );
+  } else if (psa) {
+    pool.query(
+      `
+        SELECT mukey
+        FROM ssurgo.mupolygon
+        WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))        
+      `,
+      (error, results) => {
+        if (error) {
+          console.log(error);
+          res.status(400).send(error);
+        } else {
+          mukey = results.rows.map((row) => `'${row.mukey}'`);
+          console.log(mukey);
+          ssurgo1();
+          ssurgo2();
+        }
+      },
+    );
   } else {
-    ssurgo1();
-    ssurgo2();
+    const query = `SELECT mukey from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
+    axios
+      .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+        query,
+        format: 'JSON',
+        encode: 'form',
+      })
+      .then((data) => {
+        // eslint-disable-next-line prefer-destructuring
+        mukey = data.data.Table[0][0];
+        ssurgo1();
+        ssurgo2();
+      })
+      .catch((error) => {
+        console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
+        console.log('ssurgo', query);
+        console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
+        console.error('ssurgo', query);
+        res.status(400).send(error);
+      });
   }
 }; // ssurgo
 
