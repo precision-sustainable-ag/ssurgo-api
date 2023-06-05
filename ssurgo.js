@@ -64,7 +64,14 @@ const ssurgo = (req, res) => {
 
   const filter = (req.query.filter || '').split(',');
   const parms = {
-    sacatalog: ['areasymbol', 'areaname', 'saverest', 'mbrminx', 'mbrminy', 'mbrmaxx', 'mbrmaxy'],
+    sacatalog: psa
+      ? [
+        'areasymbol', 'areaname', 'saversion', 'saverest', 'tabularversion', 'tabularverest', 'tabnasisexportdate', 'tabcertstatus',
+        'tabcertstatusdesc', 'fgdcmetadata', 'sacatalogkey',
+      ]
+      : [
+        'areasymbol', 'areaname', 'saverest', 'mbrminx', 'mbrminy', 'mbrmaxx', 'mbrmaxy',
+      ],
     legend: ['areasymbol', 'areaacres', 'projectscale', 'lkey'],
     mapunit: ['lkey', 'musym', 'muname', 'mukind', 'muacres', 'farmlndcl', 'iacornsr', 'mukey'],
     component: [
@@ -290,7 +297,15 @@ const ssurgo = (req, res) => {
     }
 
     if (test('sacatalog')) {
-      attr.push('sc.areaname, saverest, mbrminx, mbrminy, mbrmaxx, mbrmaxy');
+      if (psa) {
+        attr.push(`
+          sc.areasymbol, sc.areaname, saversion, saverest,
+          tabularversion, tabularverest, tabnasisexportdate, tabcertstatus, tabcertstatusdesc,
+          fgdcmetadata, sacatalogkey
+        `);
+      } else {
+        attr.push('sc.areaname, saverest, mbrminx, mbrminy, mbrmaxx, mbrmaxy');
+      }
     }
 
     if (test('legend')) {
