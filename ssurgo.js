@@ -4,15 +4,11 @@ const { pool } = require('./pools');
 const ssurgo = (req, res) => {
   let where;
   let data1;
-  let data2;
   let query1;
-  let query2;
   const server = req.query.server || 'usda';
   const psa = server === 'psa';
   const prefix = psa ? 'ssurgo.' : '';
   const joinType = psa ? 'FULL OUTER' : 'FULL OUTER';
-
-  const jdata = [];
 
   let minlat;
   let maxlat;
@@ -141,16 +137,17 @@ const ssurgo = (req, res) => {
   const doOutput = (data) => {
     if (output === 'json') {
       if (req.callback) {
-        req.callback(jdata);
+        req.callback(data);
       } else {
-        res.status(200).send(jdata);
+        res.status(200).send(data);
       }
     } else if (output === 'csv') {
       res.set('Content-Type', 'text/csv');
       res.setHeader('Content-disposition', `attachment; filename=SSURGO.csv`);
-      const result = data.map((d) => d.map((d2) => (d2 || '').replace(/^.*,.*$/g, (s) => `"${s}"`))
-        .join(','))
-        .join('\n');
+      const result = `
+        ${Object.keys(data[0])}
+        ${data.map((row) => Object.values(row).map((d) => (d ?? '').toString().replace(/^.*,.*$/g, (s) => `"${s}"`))).join('\n')}
+      `.trim();
 
       res.status(200).send(result);
     } else if (output === 'html') {
@@ -172,10 +169,10 @@ const ssurgo = (req, res) => {
         </style>
         <table id="Data">
           <thead>
-            <tr><th>${data[0].join('<th>')}
+            <tr><th>${Object.keys(data[0]).join('<th>')}
           </thead>
           <tbody>
-            <tr>${data.slice(1).map((r) => `<td>${r.join('<td>')}`).join('<tr>')}</tr>
+            <tr>${data.map((row) => `<td>${Object.values(row).join('<td>')}`).join('<tr>')}
           </tbody>
         </table>
       `;
@@ -185,24 +182,18 @@ const ssurgo = (req, res) => {
   }; // doOutput
 
   const outputData = () => {
-    const data = [];
-    if (data1.length > 1000) {
+    if (data1.length > 10000) {
       res.status(400).send({ ERROR: 'Too many rows' });
       return;
     }
 
-    if (!data1.length || !data2.length) {
+    if (!data1.length) {
       if (req.callback) {
         req.callback([]);
       } else {
         res.status(400).send({ ERROR: 'No data found' });
       }
     } else {
-      let i = -1;
-      do {
-        i += 1;
-      } while (data1[0][i] && data1[0][i] === data2[0][i]);
-
       if (req.query.component === 'max') {
         const col = data1[0].indexOf('comppct_r');
         const mcol = data1[0].indexOf('mukey');
@@ -228,40 +219,17 @@ const ssurgo = (req, res) => {
         });
       }
 
-      data1.slice(1).forEach((d1) => {
-        data2.slice(1).forEach((d2) => {
-          const o = {};
-          data1[0].forEach((p, n) => { o[p] = d1[n]; });
-          data2[0].forEach((p, n) => { o[p] = d2[n]; });
-          jdata.push(o);
-        });
-      });
-
-      data1.forEach((d1) => {
-        data2.forEach((d2) => {
-          if (
-            (i === 2 && d1[0] === d2[0] && d1[1] === d2[1])
-            || (i === 3 && d1[0] === d2[0] && d1[1] === d2[1] && d1[2] === d2[2])
-            || (i === 4 && d1[0] === d2[0] && d1[1] === d2[1] && d1[2] === d2[2] && d1[3] === d2[3])
-            || (i === 5 && d1[0] === d2[0] && d1[1] === d2[1] && d1[2] === d2[2] && d1[3] === d2[3] && d1[4] === d2[4])
-            || (i === 6 && d1[0] === d2[0] && d1[1] === d2[1] && d1[2] === d2[2] && d1[3] === d2[3] && d1[4] === d2[4] && d1[5] === d2[5])
-          ) {
-            data.push([...d1, ...d2.slice(4)]);
-          }
-        });
-      });
-
       if (req.query.save) {
         const sql = `
           insert into weather.ssurgo
           (description, lat, lon, categories, json)
-          values ('${req.query.save}', '${req.query.lat}', '${req.query.lon}', '${cats}', '${JSON.stringify(data)}')
+          values ('${req.query.save}', '${req.query.lat}', '${req.query.lon}', '${cats}', '${JSON.stringify(data1)}')
         `;
 
         pool.query(sql);
       }
 
-      doOutput(data);
+      doOutput(data1);
     }
   }; // outputData
 
@@ -284,7 +252,7 @@ const ssurgo = (req, res) => {
       attr.push('mu.mukey');
     }
 
-    if (test('component|restrictions|horizon')) {
+    if (test('component|restrictions|horizon|canopycover|cropyield|monthlystats')) {
       attr.push('co.cokey');
     }
 
@@ -362,7 +330,25 @@ const ssurgo = (req, res) => {
       attr.push('reskind, resdept_l, resdept_r, resdept_h, resdepb_l, resdepb_r, resdepb_h, resthk_l, resthk_r, resthk_h');
     }
 
-    const joinComponent = test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass')
+    if (test('monthlystats')) {
+      attr.push(`
+        mo.comonthkey, monthseq, month, flodfreqcl, floddurcl, pondfreqcl, ponddurcl, ponddep_l, ponddep_r, ponddep_h, dlyavgprecip_l, dlyavgprecip_r,
+        dlyavgprecip_h, dlyavgpotet_l, dlyavgpotet_r, dlyavgpotet_h, soimoistdept_l, soimoistdept_r, soimoistdept_h, soimoistdepb_l, soimoistdepb_r,
+        soimoistdepb_h, soimoiststat, soitempmm, soitempdept_l, soitempdept_r, soitempdept_h, soitempdepb_l, soitempdepb_r, soitempdepb_h
+      `);
+    }
+
+    if (test('canopycover')) {
+      attr.push('plantcov, plantsym, plantsciname, plantcomname');
+    }
+
+    if (test('cropyield')) {
+      attr.push(
+        'cropname, yldunits, nonirryield_l, nonirryield_r, nonirryield_h, irryield_l, irryield_r, irryield_h, yld.cropprodindex, vasoiprdgrp',
+      );
+    }
+
+    const joinComponent = test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass|canopycover|cropyield|monthlystats')
       ? `${joinType} JOIN ${prefix}component co ON mu.mukey = co.mukey`
       : '';
 
@@ -392,6 +378,11 @@ const ssurgo = (req, res) => {
       ${test('textureclass') ? `${joinType} JOIN ${prefix}chtexture ct ON ctg.chtgkey = ct.chtgkey` : ''}
       ${test('parentmaterial') ? `${joinType} JOIN ${prefix}copmgrp pmg ON co.cokey = pmg.cokey` : ''}
       ${test('restrictions') ? `${joinType} JOIN ${prefix}corestrictions rt ON co.cokey = rt.cokey` : ''}
+      ${test('canopycover') ? `${joinType} JOIN ${prefix}cocanopycover cov ON co.cokey = cov.cokey` : ''}
+      ${test('cropyield') ? `${joinType} JOIN ${prefix}cocropyld yld ON co.cokey = yld.cokey` : ''}
+      ${test('monthlystats') ? `${joinType} JOIN ${prefix}comonth mo ON co.cokey = mo.cokey` : ''}
+      ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoilmoist moist ON mo.comonthkey = moist.comonthkey` : ''}
+      ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoiltemp temp ON mo.comonthkey = temp.comonthkey` : ''}
       ${where}
       ${seriesOnly}
     `;
@@ -404,159 +395,49 @@ const ssurgo = (req, res) => {
     console.log('query1');
     console.log(query1);
 
-    if (output !== 'query') {
-      if (psa) {
-        pool.query(
-          query1,
-          (error, results) => {
-            if (error) {
-              console.log(error);
-              res.status(400).send(error);
-            } else {
-              data1 = [];
-              data1.push(Object.keys(results.rows[0]));
-              results.rows.forEach((row) => data1.push(Object.values(row)));
-              if (data2) {
-                outputData();
-              }
-            }
-          },
-        );
-      } else {
-        axios
-          .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
-            query: query1,
-            format: 'JSON+COLUMNNAME',
-            encode: 'form',
-          })
-          .then((data) => {
-            // console.log(data);
-            data1 = data.data.Table || [];
-            // console.log(data1);
-            if (data2) {
-              outputData();
-            }
-          })
-          .catch((error) => {
-            console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-            console.log('ssurgo', query1);
-            console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-            console.error('ssurgo', query1);
-            res.status(400).send(error);
-          });
-      }
-    }
-  }; // ssurgo1
-
-  const ssurgo2 = () => {
-    const attr = [];
-
-    if (lat !== 'NULL') {
-      attr.push(`${lat} as lat, ${lon} as lon`);
-    }
-
-    if (test('sacatalog')) {
-      attr.push('sc.areasymbol');
-    }
-
-    if (test('legend')) {
-      attr.push('lg.lkey');
-    }
-
-    if (test('mapunit')) {
-      attr.push('mu.mukey');
-    }
-
-    if (test('component|canopycover|cropyield|monthlystats')) {
-      attr.push('co.cokey');
-    }
-
-    if (test('monthlystats')) {
-      attr.push('mo.comonthkey');
-    }
-
-    if (test('canopycover')) {
-      attr.push('plantcov, plantsym, plantsciname, plantcomname');
-    }
-
-    if (test('cropyield')) {
-      attr.push(
-        'cropname, yldunits, nonirryield_l, nonirryield_r, nonirryield_h, irryield_l, irryield_r, irryield_h, yld.cropprodindex, vasoiprdgrp',
-      );
-    }
-
-    if (test('monthlystats')) {
-      attr.push(`
-        monthseq, month, flodfreqcl, floddurcl, pondfreqcl, ponddurcl, ponddep_l, ponddep_r, ponddep_h, dlyavgprecip_l, dlyavgprecip_r,
-        dlyavgprecip_h, dlyavgpotet_l, dlyavgpotet_r, dlyavgpotet_h, soimoistdept_l, soimoistdept_r, soimoistdept_h, soimoistdepb_l, soimoistdepb_r,
-        soimoistdepb_h, soimoiststat, soitempmm, soitempdept_l, soitempdept_r, soitempdept_h, soitempdepb_l, soitempdepb_r, soitempdepb_h
-      `);
-    }
-
-    query2 = `
-      SELECT DISTINCT ${attr}
-      FROM ${prefix}sacatalog sc
-      ${joinType} JOIN ${prefix}legend lg ON sc.areasymbol = lg.areasymbol
-      ${joinType} JOIN (
-        SELECT * FROM ${prefix}mapunit
-        WHERE mukey in (${mukey})
-      ) mu ON lg.lkey = mu.lkey
-      ${test('component|canopycover|cropyield|monthlystats') ? `${joinType} JOIN ${prefix}component co ON mu.mukey = co.mukey` : ''}
-      ${test('canopycover') ? `${joinType} JOIN ${prefix}cocanopycover cov ON co.cokey = cov.cokey` : ''}
-      ${test('cropyield') ? `${joinType} JOIN ${prefix}cocropyld yld ON co.cokey = yld.cokey` : ''}
-      ${test('monthlystats') ? `${joinType} JOIN ${prefix}comonth mo ON co.cokey = mo.cokey` : ''}
-      ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoilmoist moist ON mo.comonthkey = moist.comonthkey` : ''}
-      ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoiltemp temp ON mo.comonthkey = temp.comonthkey` : ''}
-      ${where}
-    `;
-
-    query2 = doFilter(query2);
-
-    console.log('query2');
-    console.log(query2);
-
     if (output === 'query') {
-      res.status(200).send(`${query1}\n${'_'.repeat(80)}\n${query2}`);
+      res.status(200).send(query1);
     } else if (psa) {
       pool.query(
-        query2,
+        query1,
         (error, results) => {
           if (error) {
             console.log(error);
             res.status(400).send(error);
           } else {
-            data2 = [];
-            data2.push(Object.keys(results.rows[0]));
-            results.rows.forEach((row) => data2.push(Object.values(row)));
-
-            if (data1) {
-              outputData();
-            }
+            data1 = results.rows;
+            outputData();
           }
         },
       );
     } else {
       axios
         .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
-          query: query2,
+          query: query1,
           format: 'JSON+COLUMNNAME',
           encode: 'form',
         })
         .then((data) => {
-          data2 = data.data.Table || [];
-          if (data1) {
-            outputData();
+          // console.log(data); process.exit();
+          data1 = [];
+          if (data.data.Table.length) {
+            data.data.Table.slice(1).forEach((row) => {
+              const obj = {};
+              row.forEach((d, i) => { obj[data.data.Table[0][i]] = d; });
+              data1.push(obj);
+            });
           }
+          outputData();
         })
         .catch((error) => {
           console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-          console.log('ssurgo', query2);
+          console.log('ssurgo', query1);
           console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-          console.error('ssurgo', query2);
+          console.error('ssurgo', query1);
           res.status(400).send(error);
         });
     }
-  }; // ssurgo2
+  }; // ssurgo1
 
   if (!req.query.lat && !req.query.mukey && !req.query.polygon) {
     res.sendFile(`${__dirname}/public/index.html`);
@@ -640,7 +521,6 @@ const ssurgo = (req, res) => {
           doOutput(results.rows[0].json);
         } else {
           ssurgo1();
-          ssurgo2();
         }
       },
     );
@@ -659,7 +539,6 @@ const ssurgo = (req, res) => {
           mukey = results.rows.map((row) => `'${row.mukey}'`);
           console.log(mukey);
           ssurgo1();
-          ssurgo2();
         }
       },
     );
@@ -673,9 +552,8 @@ const ssurgo = (req, res) => {
       })
       .then((data) => {
         // eslint-disable-next-line prefer-destructuring
-        mukey = data.data.Table[0][0];
+        mukey = `'${data.data.Table[0][0]}'`;
         ssurgo1();
-        ssurgo2();
       })
       .catch((error) => {
         console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
