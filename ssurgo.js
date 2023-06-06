@@ -553,72 +553,70 @@ const ssurgo = (req, res) => {
 
 const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   const { lat, lon } = req.query;
-  const query = `
-    SELECT ${lon} as lon, ${lat} as lat, mukey, mupolygongeo
-    FROM mupolygon
-    WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(${lon} ${lat})', 4326)) = 1;
-  `;
+  if (req.query.server === 'usda') {
+    const query = `
+      SELECT ${lon} as lon, ${lat} as lat, mukey, mupolygongeo
+      FROM mupolygon
+      WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(${lon} ${lat})', 4326)) = 1;
+    `;
 
-  axios
-    .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
-      query,
-      format: 'JSON',
-      encode: 'form',
-    })
-    .then((data) => {
-      const result = (data.data.Table || []).map((d) => {
-        const [lon2, lat2, mukey, polygon2, polygonarray] = d;
-        return {
-          lon: lon2,
-          lat: lat2,
-          mukey,
-          polygon: polygon2,
-          polygonarray,
-        };
-      });
+    axios
+      .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+        query,
+        format: 'JSON',
+        encode: 'form',
+      })
+      .then((data) => {
+        const result = (data.data.Table || []).map((d) => {
+          const [lon2, lat2, mukey, polygon2, polygonarray] = d;
+          return {
+            lon: lon2,
+            lat: lat2,
+            mukey,
+            polygon: polygon2,
+            polygonarray,
+          };
+        });
 
-      res.send(result);
-    })
-    .catch((error) => {
-      console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-      console.log('ssurgo', query);
-      console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-      console.error('ssurgo', query);
-      res.status(400).send(error);
-    });
-}; // polygon
-
-const polygonInhouse = (req, res) => {
-  const { lat, lon } = req.query;
-  const query = `
-    SELECT
-      ${lon} as lon,
-      ${lat} as lat,
-      mukey,
-      ST_AsText(ST_Transform(shape, 4326)) as polygon,
-      (ST_AsGeoJSON(ST_Multi(ST_Transform(shape, 4326)))::jsonb->'coordinates') as polygonarray
-    FROM
-      ssurgo.mupolygon
-    WHERE
-      ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
-  `;
-
-  pool.query(
-    query,
-    (error, results) => {
-      if (error) {
-        console.log(error);
+        res.send(result);
+      })
+      .catch((error) => {
+        console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
+        console.log('ssurgo', query);
+        console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
+        console.error('ssurgo', query);
         res.status(400).send(error);
-      } else {
-        console.log(results.rows);
-        res.send(results.rows);
-      }
-    },
-  );
-}; // polygonInhouse
+      });
+  } else {
+    const query = `
+      SELECT
+        ${lon} as lon,
+        ${lat} as lat,
+        mukey,
+        ST_AsText(ST_Transform(shape, 4326)) as polygon,
+        (ST_AsGeoJSON(ST_Multi(ST_Transform(shape, 4326)))::jsonb->'coordinates') as polygonarray
+      FROM
+        ssurgo.mupolygon
+      WHERE
+        ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
+    `;
+
+    pool.query(
+      query,
+      (error, results) => {
+        if (error) {
+          console.log(error);
+          res.status(400).send(error);
+        } else {
+          console.log(results.rows);
+          res.send(results.rows);
+        }
+      },
+    );
+  }
+}; // polygon
 
 module.exports = {
   ssurgo,
   polygon,
-  polygonInhouse,
 };
