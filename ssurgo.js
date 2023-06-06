@@ -5,10 +5,9 @@ const ssurgo = (req, res) => {
   let where;
   let data1;
   let query1;
-  const server = req.query.server || 'usda';
-  const psa = server === 'psa';
+  const psa = req.query.server !== 'usda';
   const prefix = psa ? 'ssurgo.' : '';
-  const joinType = psa ? 'FULL OUTER' : 'FULL OUTER';
+  const joinType = 'LEFT';
 
   let minlat;
   let maxlat;
@@ -392,6 +391,7 @@ const ssurgo = (req, res) => {
     }
 
     query1 = doFilter(query1);
+    // query1 = `${query1} ORDER BY 1, 2`;
     console.log('query1');
     console.log(query1);
 
@@ -418,7 +418,6 @@ const ssurgo = (req, res) => {
           encode: 'form',
         })
         .then((data) => {
-          // console.log(data); process.exit();
           data1 = [];
           if (data.data.Table.length) {
             data.data.Table.slice(1).forEach((row) => {
@@ -462,29 +461,6 @@ const ssurgo = (req, res) => {
 
   if (mukey) {
     where = `WHERE mu.mukey IN (${mukey})`;
-  } else if (polygon) {
-    where = `WHERE mu.mukey IN (
-      SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')
-    )`;
-
-    /*
-      where = `
-        SELECT a.mukey FROM
-        SDA_Get_Mukey_from_intersection_with_WktWgs84(
-          'polygon((${minlon} ${minlat}, ${minlon} ${maxlat}, ${maxlon} ${maxlat}, ${maxlon} ${minlat}, ${minlon} ${minlat}))'
-        ) a
-        INNER JOIN
-        SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))') b
-        on a.mukey = b.mukey
-      `;
-
-      where = `
-        SELECT mukey
-        FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')
-        where mukey='123'
-      `;
-      console.log(where);
-    */
   } else {
     where = 'WHERE mu.mukey IS NOT NULL';
   }
@@ -525,25 +501,35 @@ const ssurgo = (req, res) => {
       },
     );
   } else if (psa) {
-    pool.query(
+    const query = polygon
+      ? `
+        SELECT mukey FROM ssurgo.mupolygon
+        WHERE ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_MakePolygon('LINESTRING(${polygon})'), 4326), 5070))
       `
-        SELECT mukey
-        FROM ssurgo.mupolygon
-        WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))        
-      `,
+      : `
+        SELECT mukey FROM ssurgo.mupolygon
+        WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
+      `;
+
+    // console.log(query);
+    pool.query(
+      query,
       (error, results) => {
         if (error) {
           console.log(error);
           res.status(400).send(error);
         } else {
           mukey = results.rows.map((row) => `'${row.mukey}'`);
-          console.log(mukey);
           ssurgo1();
         }
       },
     );
   } else {
-    const query = `SELECT mukey from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
+    const query = polygon
+      ? `SELECT mukey from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')`
+      : `SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
+
+    // console.log(query);
     axios
       .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
         query,
@@ -552,7 +538,7 @@ const ssurgo = (req, res) => {
       })
       .then((data) => {
         // eslint-disable-next-line prefer-destructuring
-        mukey = `'${data.data.Table[0][0]}'`;
+        mukey = data.data.Table.map((row) => `'${row[0]}'`);
         ssurgo1();
       })
       .catch((error) => {
@@ -580,7 +566,6 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
       encode: 'form',
     })
     .then((data) => {
-      console.log(data.data.Table);
       const result = (data.data.Table || []).map((d) => {
         const [lon2, lat2, mukey, polygon2, polygonarray] = d;
         return {
