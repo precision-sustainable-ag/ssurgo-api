@@ -419,10 +419,11 @@ const ssurgo = (req, res) => {
         })
         .then((data) => {
           data1 = [];
-          if (data.data.Table.length) {
-            data.data.Table.slice(1).forEach((row) => {
+          const table = data.data.Table || [];
+          if (table.length) {
+            table.slice(1).forEach((row) => {
               const obj = {};
-              row.forEach((d, i) => { obj[data.data.Table[0][i]] = d; });
+              row.forEach((d, i) => { obj[table[0][i]] = d; });
               data1.push(obj);
             });
           }
