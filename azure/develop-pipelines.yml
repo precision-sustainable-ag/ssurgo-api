@@ -33,6 +33,10 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+    - script: |
+        echo "$(DB)|$(DB_TYPE)|$(DB_PASS)" >> /home/vsts/work/1/s/.env
+        cat /home/vsts/work/1/s/.env
+      displayName: "Create .env"
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
