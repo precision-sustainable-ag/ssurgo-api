@@ -31,6 +31,7 @@ const ssurgo = (req, res) => {
     '-canopycover',
     '-cropyield',
     '-monthlystats',
+    '-muaggatt',
   ];
 
   if ((req.query.categories || '').includes('clear')) {
@@ -49,6 +50,7 @@ const ssurgo = (req, res) => {
       '-canopycover',
       '-cropyield',
       '-monthlystats',
+      '-muaggatt',
     ];
   }
 
@@ -109,6 +111,12 @@ const ssurgo = (req, res) => {
       'dlyavgprecip_r', 'dlyavgprecip_h', 'dlyavgpotet_l', 'dlyavgpotet_r', 'dlyavgpotet_h', 'comonthkey', 'comonthkey', 'soimoistdept_l',
       'soimoistdept_r', 'soimoistdept_h', 'soimoistdepb_l', 'soimoistdepb_r', 'soimoistdepb_h', 'soimoiststat', 'comonthkey', 'soitempmm',
       'soitempdept_l', 'soitempdept_r', 'soitempdept_h', 'soitempdepb_l', 'soitempdepb_r', 'soitempdepb_h',
+    ],
+    muaggatt: [
+      'muname', 'slopegraddcp', 'slopegradwta', 'brockdepmin', 'wtdepannmin', 'wtdepaprjunmin', 'flodfreqdcd', 'flodfreqmax', 'pondfreqprs',
+      'aws025wta', 'aws050wta', 'aws0100wta', 'aws0150wta', 'drclassdcd', 'drclasswettest', 'hydgrpdcd', 'iccdcd', 'iccdcdpct', 'niccdcd',
+      'niccdcdpct', 'engdwobdcd', 'engdwbdcd', 'engdwbll', 'engdwbml', 'engstafdcd', 'engstafll', 'engstafml', 'engsldcd', 'engsldcp',
+      'englrsdcd', 'engcmssdcd', 'engcmssmp', 'urbrecptdcd', 'urbrecptwta', 'forpehrtdcp', 'hydclprs', 'awmmfpwwta', 'mukey',
     ],
   };
 
@@ -280,7 +288,7 @@ const ssurgo = (req, res) => {
     }
 
     if (test('mapunit')) {
-      attr.push('musym, muname, mukind, muacres, farmlndcl, iacornsr');
+      attr.push('mu.musym, mu.muname, mukind, muacres, farmlndcl, iacornsr');
     }
 
     if (test('component')) {
@@ -347,6 +355,15 @@ const ssurgo = (req, res) => {
       );
     }
 
+    if (test('muaggatt')) {
+      attr.push(`
+        slopegraddcp, slopegradwta, brockdepmin, wtdepannmin, wtdepaprjunmin, flodfreqdcd, flodfreqmax, pondfreqprs,
+        aws025wta, aws050wta, aws0100wta, aws0150wta, drclassdcd, drclasswettest, hydgrpdcd, iccdcd, iccdcdpct, niccdcd,
+        niccdcdpct, engdwobdcd, engdwbdcd, engdwbll, engdwbml, engstafdcd, engstafll, engstafml, engsldcd, engsldcp,
+        englrsdcd, engcmssdcd, engcmssmp, urbrecptdcd, urbrecptwta, forpehrtdcp, hydclprs, awmmfpwwta
+      `);
+    }
+
     const joinComponent = test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass|canopycover|cropyield|monthlystats')
       ? `${joinType} JOIN ${prefix}component co ON mu.mukey = co.mukey`
       : '';
@@ -382,6 +399,7 @@ const ssurgo = (req, res) => {
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}comonth mo ON co.cokey = mo.cokey` : ''}
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoilmoist moist ON mo.comonthkey = moist.comonthkey` : ''}
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoiltemp temp ON mo.comonthkey = temp.comonthkey` : ''}
+      ${test('muaggatt') ? `${joinType} JOIN ${prefix}muaggatt ON muaggatt.mukey = mu.mukey` : ''}
       ${where}
       ${seriesOnly}
     `;
