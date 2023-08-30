@@ -1,5 +1,3 @@
-'use strict';
-
 $(() => {
   const updateURL = () => {
     const lat = $('#Lat').val();
@@ -136,9 +134,10 @@ $(() => {
   }; // events
 
   fetch('Inventory.txt?' + Math.random())
-    .then(data => data.text())
-    .then(data => {
+    .then((data) => data.text())
+    .then((data) => {
       // $('#Documentation').show(); $('#SSURGO').hide();
+      data = data.replace(/\t"/g, '\t').replace(/"[\r\n]/g, '\n').replace(/""/g, '"');
 
       $('#Dictionary').html('<tr><td>' + data.replace(/\t/g, '<td>').split(/[\n\r]+/).join('<tr><td>'));
 
