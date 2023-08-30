@@ -357,7 +357,7 @@ const ssurgo = (req, res) => {
 
     if (test('muaggatt')) {
       attr.push(`
-        slopegraddcp, slopegradwta, brockdepmin, wtdepannmin, wtdepaprjunmin, flodfreqdcd, flodfreqmax, pondfreqprs,
+        muaggatt.mukey, muaggatt.muname, slopegraddcp, slopegradwta, brockdepmin, wtdepannmin, wtdepaprjunmin, flodfreqdcd, flodfreqmax, pondfreqprs,
         aws025wta, aws050wta, aws0100wta, aws0150wta, drclassdcd, drclasswettest, hydgrpdcd, iccdcd, iccdcdpct, niccdcd,
         niccdcdpct, engdwobdcd, engdwbdcd, engdwbll, engdwbml, engstafdcd, engstafll, engstafml, engsldcd, engsldcp,
         englrsdcd, engcmssdcd, engcmssmp, urbrecptdcd, urbrecptwta, forpehrtdcp, hydclprs, awmmfpwwta
