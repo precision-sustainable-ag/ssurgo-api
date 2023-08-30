@@ -11,12 +11,12 @@ resources:
 variables:
 
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'f278a8df-7780-4525-b872-da8a32b56f32'
+  dockerRegistryServiceConnection: '2c27cb76-18cd-4252-9e4d-7ce60c327f91'
   imageRepository: 'ssurgoapi'
   containerRegistry: 'containerregistry4pd7i.azurecr.io'
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'containerregistry4pd7id289-auth'
+  imagePullSecret: 'containerregistry4pd7i94658342-auth'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -60,7 +60,7 @@ stages:
     displayName: Deploy
     pool:
       vmImage: $(vmImageName)
-    environment: 'precisionsustainableagssurgoapi.develop'
+    environment: 'precisionsustainableagssurgoapi-5058.develop'
     strategy:
       runOnce:
         deploy:
@@ -90,7 +90,7 @@ stages:
     pool:
       vmImage: $(vmImageName)
 
-    environment: 'precisionsustainableagssurgoapi.$(k8sNamespaceForPR)'
+    environment: 'precisionsustainableagssurgoapi-5058.$(k8sNamespaceForPR)'
     strategy:
       runOnce:
         deploy:
