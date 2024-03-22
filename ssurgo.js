@@ -32,6 +32,7 @@ const ssurgo = (req, res) => {
     '-cropyield',
     '-monthlystats',
     '-muaggatt',
+    '-coecoclass',
   ];
 
   if ((req.query.categories || '').includes('clear')) {
@@ -51,6 +52,7 @@ const ssurgo = (req, res) => {
       '-cropyield',
       '-monthlystats',
       '-muaggatt',
+      '-coecoclass',
     ];
   }
 
@@ -117,6 +119,9 @@ const ssurgo = (req, res) => {
       'aws025wta', 'aws050wta', 'aws0100wta', 'aws0150wta', 'drclassdcd', 'drclasswettest', 'hydgrpdcd', 'iccdcd', 'iccdcdpct', 'niccdcd',
       'niccdcdpct', 'engdwobdcd', 'engdwbdcd', 'engdwbll', 'engdwbml', 'engstafdcd', 'engstafll', 'engstafml', 'engsldcd', 'engsldcp',
       'englrsdcd', 'engcmssdcd', 'engcmssmp', 'urbrecptdcd', 'urbrecptwta', 'forpehrtdcp', 'hydclprs', 'awmmfpwwta', 'mukey',
+    ],
+    coecoclass: [
+      'cokey', 'ecoclasstypename', 'ecoclassref', 'ecoclassid', 'ecoclassname', 'coecoclasskey',
     ],
   };
 
@@ -364,6 +369,12 @@ const ssurgo = (req, res) => {
       `);
     }
 
+    if (test('coecoclass')) {
+      attr.push(`
+        coecoclass.cokey, ecoclasstypename, ecoclassref, ecoclassid, ecoclassname, coecoclasskey
+      `);
+    }
+
     const joinComponent = test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass|canopycover|cropyield|monthlystats')
       ? `${joinType} JOIN ${prefix}component co ON mu.mukey = co.mukey`
       : '';
@@ -400,6 +411,7 @@ const ssurgo = (req, res) => {
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoilmoist moist ON mo.comonthkey = moist.comonthkey` : ''}
       ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoiltemp temp ON mo.comonthkey = temp.comonthkey` : ''}
       ${test('muaggatt') ? `${joinType} JOIN ${prefix}muaggatt ON muaggatt.mukey = mu.mukey` : ''}
+      ${test('coecoclass') ? `${joinType} JOIN ${prefix}coecoclass ON co.cokey = coecoclass.cokey` : ''}
       ${where}
       ${seriesOnly}
     `;
