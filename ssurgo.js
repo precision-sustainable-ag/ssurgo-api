@@ -5,8 +5,9 @@ const ssurgo = (req, res) => {
   let where;
   let data1;
   let query1;
-  const psa = req.query.server !== 'usda';
-  const prefix = psa ? 'ssurgo.' : '';
+  const server = req.query.server || 'psa';
+  const psa = server !== 'usda';
+  const prefix = server === 'psaold' ? 'ssurgo.' : '';
   const joinType = 'LEFT';
 
   let minlat;
@@ -238,7 +239,7 @@ const ssurgo = (req, res) => {
           values ('${req.query.save}', '${req.query.lat}', '${req.query.lon}', '${cats}', '${JSON.stringify(data1)}')
         `;
 
-        pool.query(sql);
+        pool[server].query(sql);
       }
 
       doOutput(data1);
@@ -428,7 +429,7 @@ const ssurgo = (req, res) => {
     if (output === 'query') {
       res.status(200).send(query1);
     } else if (psa) {
-      pool.query(
+      pool[server].query(
         query1,
         (error, results) => {
           if (error) {
@@ -518,7 +519,7 @@ const ssurgo = (req, res) => {
       where description = '${req.query.save}' and lat = '${req.query.lat}' and lon = '${req.query.lon}' and categories = '${cats}'
     `;
 
-    pool.query(
+    pool[server].query(
       sql,
       (err, results) => {
         if (err) {
@@ -534,16 +535,16 @@ const ssurgo = (req, res) => {
   } else if (psa) {
     const query = polygon
       ? `
-        SELECT mukey FROM ssurgo.mupolygon
+        SELECT mukey FROM ${prefix}mupolygon
         WHERE ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_MakePolygon('LINESTRING(${polygon})'), 4326), 5070))
       `
       : `
-        SELECT mukey FROM ssurgo.mupolygon
+        SELECT mukey FROM ${prefix}mupolygon
         WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
       `;
 
     // console.log(query);
-    pool.query(
+    pool[server].query(
       query,
       (error, results) => {
         if (error) {
@@ -584,6 +585,9 @@ const ssurgo = (req, res) => {
 
 const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   const { lat, lon } = req.query;
+  const server = req.query.server || 'psa';
+  const prefix = server === 'psaold' ? 'ssurgo.' : '';
+
   if (req.query.server === 'usda') {
     const query = `
       SELECT ${lon} as lon, ${lat} as lat, mukey, mupolygongeo
@@ -627,12 +631,12 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
         ST_AsText(ST_Transform(shape, 4326)) as polygon,
         (ST_AsGeoJSON(ST_Multi(ST_Transform(shape, 4326)))::jsonb->'coordinates') as polygonarray
       FROM
-        ssurgo.mupolygon
+        ${prefix}mupolygon
       WHERE
         ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
     `;
 
-    pool.query(
+    pool[server].query(
       query,
       (error, results) => {
         if (error) {

@@ -1,21 +1,24 @@
 const { Pool } = require('pg');
-const fs = require('fs');
 
-const data = fs.readFileSync('./.env', 'utf8');
-const logins = {};
-
-data.split(/[\n\r]+/).forEach((login) => {
-  const [db, user, pass] = login.split('|');
-  logins[db] = { user, pass };
-});
-
-const pool = new Pool({
-  user: logins.Weather.user,
-  password: logins.Weather.pass,
-  host: '128.192.142.200',
-  database: 'postgres',
-  port: 5432,
-});
+const pool = {
+  psa: new Pool({
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    host: process.env.HOST,
+    database: process.env.DATABASE,
+    port: process.env.PORT,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  }),
+  psaold: new Pool({
+    user: process.env.WEATHER_USER,
+    password: process.env.WEATHER_PASSWORD,
+    host: process.env.WEATHER_HOST,
+    database: process.env.WEATHER_DATABASE,
+    port: process.env.WEATHER_PORT,
+  }),
+};
 
 module.exports = {
   pool,
