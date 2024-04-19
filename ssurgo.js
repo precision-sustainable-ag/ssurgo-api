@@ -585,7 +585,7 @@ const ssurgo = (req, res) => {
 
 const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   const { lat, lon } = req.query;
-  const server = req.query.server || 'PSA';
+  const server = req.query.server || 'psa';
   const prefix = server === 'psaold' ? 'ssurgo.' : '';
 
   if (req.query.server === 'usda') {
