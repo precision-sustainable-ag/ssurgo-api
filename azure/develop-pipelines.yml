@@ -34,7 +34,16 @@ stages:
       vmImage: $(vmImageName)
     steps:
     - script: |
-        echo "$(DB)|$(DB_TYPE)|$(DB_PASS)" >> /home/vsts/work/1/s/.env
+        echo USER="$(USER)" >> /home/vsts/work/1/s/.env
+        echo PASSWORD="$(PASSWORD)" >> /home/vsts/work/1/s/.env
+        echo HOST="$(HOST)" >> /home/vsts/work/1/s/.env
+        echo DATABASE="$(DATABASE)" >> /home/vsts/work/1/s/.env
+        echo PORT="$(PORT)" >> /home/vsts/work/1/s/.env
+        echo WEATHER_USER="$(WEATHER_USER)" >> /home/vsts/work/1/s/.env
+        echo WEATHER_PASSWORD="$(WEATHER_PASSWORD)" >> /home/vsts/work/1/s/.env
+        echo WEATHER_HOST="$(WEATHER_HOST)" >> /home/vsts/work/1/s/.env
+        echo WEATHER_DATABASE="$(WEATHER_DATABASE)" >> /home/vsts/work/1/s/.env
+        echo WEATHER_PORT="$(WEATHER_PORT)" >> /home/vsts/work/1/s/.env
         cat /home/vsts/work/1/s/.env
       displayName: "Create .env"
     - task: Docker@2
