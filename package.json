@@ -41,6 +41,7 @@
     "depd": "^2.0.0",
     "destroy": "^1.2.0",
     "dicer": "^0.3.0",
+    "dotenv": "^16.4.5",
     "ecc-jsbn": "^0.1.2",
     "ee-first": "^1.1.1",
     "emitter-listener": "^1.1.2",
