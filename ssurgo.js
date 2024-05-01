@@ -7,7 +7,6 @@ const ssurgo = (req, res) => {
   let query1;
   const server = req.query.server || 'psa';
   const psa = server !== 'usda';
-  const prefix = server === 'psaold' ? 'ssurgo.' : '';
   const joinType = 'LEFT';
 
   let minlat;
@@ -232,16 +231,6 @@ const ssurgo = (req, res) => {
         });
       }
 
-      if (req.query.save) {
-        const sql = `
-          insert into weather.ssurgo
-          (description, lat, lon, categories, json)
-          values ('${req.query.save}', '${req.query.lat}', '${req.query.lon}', '${cats}', '${JSON.stringify(data1)}')
-        `;
-
-        pool[server].query(sql);
-      }
-
       doOutput(data1);
     }
   }; // outputData
@@ -377,7 +366,7 @@ const ssurgo = (req, res) => {
     }
 
     const joinComponent = test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass|canopycover|cropyield|monthlystats')
-      ? `${joinType} JOIN ${prefix}component co ON mu.mukey = co.mukey`
+      ? `${joinType} JOIN component co ON mu.mukey = co.mukey`
       : '';
 
     let seriesOnly;
@@ -392,27 +381,27 @@ const ssurgo = (req, res) => {
 
     query1 = `
       SELECT DISTINCT ${attr}
-      FROM ${prefix}sacatalog sc
-      ${joinType} JOIN ${prefix}legend lg ON sc.areasymbol = lg.areasymbol
+      FROM sacatalog sc
+      ${joinType} JOIN legend lg ON sc.areasymbol = lg.areasymbol
       ${joinType} JOIN (
-        SELECT * FROM ${prefix}mapunit
+        SELECT * FROM mapunit
         WHERE mukey in (${mukey})
       ) mu ON lg.lkey = mu.lkey
       ${joinComponent}
-      ${test('horizon|pores|structure|textureclass') ? `${joinType} JOIN ${prefix}chorizon ch ON co.cokey = ch.cokey` : ''}
-      ${test('pores') ? `${joinType} JOIN ${prefix}chpores cp ON ch.chkey = cp.chkey` : ''}
-      ${test('structure') ? `${joinType} JOIN ${prefix}chstructgrp csg ON ch.chkey = csg.chkey` : ''}
-      ${test('textureclass') ? `${joinType} JOIN ${prefix}chtexturegrp ctg ON ch.chkey = ctg.chkey` : ''}
-      ${test('textureclass') ? `${joinType} JOIN ${prefix}chtexture ct ON ctg.chtgkey = ct.chtgkey` : ''}
-      ${test('parentmaterial') ? `${joinType} JOIN ${prefix}copmgrp pmg ON co.cokey = pmg.cokey` : ''}
-      ${test('restrictions') ? `${joinType} JOIN ${prefix}corestrictions rt ON co.cokey = rt.cokey` : ''}
-      ${test('canopycover') ? `${joinType} JOIN ${prefix}cocanopycover cov ON co.cokey = cov.cokey` : ''}
-      ${test('cropyield') ? `${joinType} JOIN ${prefix}cocropyld yld ON co.cokey = yld.cokey` : ''}
-      ${test('monthlystats') ? `${joinType} JOIN ${prefix}comonth mo ON co.cokey = mo.cokey` : ''}
-      ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoilmoist moist ON mo.comonthkey = moist.comonthkey` : ''}
-      ${test('monthlystats') ? `${joinType} JOIN ${prefix}cosoiltemp temp ON mo.comonthkey = temp.comonthkey` : ''}
-      ${test('muaggatt') ? `${joinType} JOIN ${prefix}muaggatt ON muaggatt.mukey = mu.mukey` : ''}
-      ${test('coecoclass') ? `${joinType} JOIN ${prefix}coecoclass ON co.cokey = coecoclass.cokey` : ''}
+      ${test('horizon|pores|structure|textureclass') ? `${joinType} JOIN chorizon ch ON co.cokey = ch.cokey` : ''}
+      ${test('pores') ? `${joinType} JOIN chpores cp ON ch.chkey = cp.chkey` : ''}
+      ${test('structure') ? `${joinType} JOIN chstructgrp csg ON ch.chkey = csg.chkey` : ''}
+      ${test('textureclass') ? `${joinType} JOIN chtexturegrp ctg ON ch.chkey = ctg.chkey` : ''}
+      ${test('textureclass') ? `${joinType} JOIN chtexture ct ON ctg.chtgkey = ct.chtgkey` : ''}
+      ${test('parentmaterial') ? `${joinType} JOIN copmgrp pmg ON co.cokey = pmg.cokey` : ''}
+      ${test('restrictions') ? `${joinType} JOIN corestrictions rt ON co.cokey = rt.cokey` : ''}
+      ${test('canopycover') ? `${joinType} JOIN cocanopycover cov ON co.cokey = cov.cokey` : ''}
+      ${test('cropyield') ? `${joinType} JOIN cocropyld yld ON co.cokey = yld.cokey` : ''}
+      ${test('monthlystats') ? `${joinType} JOIN comonth mo ON co.cokey = mo.cokey` : ''}
+      ${test('monthlystats') ? `${joinType} JOIN cosoilmoist moist ON mo.comonthkey = moist.comonthkey` : ''}
+      ${test('monthlystats') ? `${joinType} JOIN cosoiltemp temp ON mo.comonthkey = temp.comonthkey` : ''}
+      ${test('muaggatt') ? `${joinType} JOIN muaggatt ON muaggatt.mukey = mu.mukey` : ''}
+      ${test('coecoclass') ? `${joinType} JOIN coecoclass ON co.cokey = coecoclass.cokey` : ''}
       ${where}
       ${seriesOnly}
     `;
@@ -429,7 +418,7 @@ const ssurgo = (req, res) => {
     if (output === 'query') {
       res.status(200).send(query1);
     } else if (psa) {
-      pool[server].query(
+      pool.query(
         query1,
         (error, results) => {
           if (error) {
@@ -513,38 +502,19 @@ const ssurgo = (req, res) => {
       if (idx > -1) cats[idx] = cat.replace(' ', '+');
     });
 
-  if (req.query.save) {
-    const sql = `
-      select * from weather.ssurgo
-      where description = '${req.query.save}' and lat = '${req.query.lat}' and lon = '${req.query.lon}' and categories = '${cats}'
-    `;
-
-    pool[server].query(
-      sql,
-      (err, results) => {
-        if (err) {
-          console.error('ssurgo', err);
-          res.status(400).send(err);
-        } else if (results.rows.length) {
-          doOutput(results.rows[0].json);
-        } else {
-          ssurgo1();
-        }
-      },
-    );
-  } else if (psa) {
+  if (psa) {
     const query = polygon
       ? `
-        SELECT mukey FROM ${prefix}mupolygon
+        SELECT mukey FROM mupolygon
         WHERE ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_MakePolygon('LINESTRING(${polygon})'), 4326), 5070))
       `
       : `
-        SELECT mukey FROM ${prefix}mupolygon
+        SELECT mukey FROM mupolygon
         WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
       `;
 
     // console.log(query);
-    pool[server].query(
+    pool.query(
       query,
       (error, results) => {
         if (error) {
@@ -585,8 +555,6 @@ const ssurgo = (req, res) => {
 
 const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   const { lat, lon } = req.query;
-  const server = req.query.server || 'psa';
-  const prefix = server === 'psaold' ? 'ssurgo.' : '';
 
   if (req.query.server === 'usda') {
     const query = `
@@ -631,12 +599,12 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
         ST_AsText(ST_Transform(shape, 4326)) as polygon,
         (ST_AsGeoJSON(ST_Multi(ST_Transform(shape, 4326)))::jsonb->'coordinates') as polygonarray
       FROM
-        ${prefix}mupolygon
+        mupolygon
       WHERE
         ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
     `;
 
-    pool[server].query(
+    pool.query(
       query,
       (error, results) => {
         if (error) {
