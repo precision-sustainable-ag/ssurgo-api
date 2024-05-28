@@ -704,7 +704,7 @@ const vegspec = async (req, res) => {
     ORDER BY
       comppct_r DESC,
       compname,
-      hzdept_r DESC
+      hzdept_r
   `;
 
   let results;
