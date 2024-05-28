@@ -666,7 +666,8 @@ const vegspec = async (req, res) => {
         component co
       INNER JOIN MaxComp mc ON co.mukey = mc.mukey AND co.comppct_r = mc.max_comppct_r
     )
-    SELECT 
+    SELECT
+      mu.mukey,
       co.cokey,
       hzname,
       desgnmaster,
@@ -712,7 +713,7 @@ const vegspec = async (req, res) => {
       )
       AND desgnmaster NOT LIKE '%C%'
     GROUP BY
-      co.cokey, hzname, desgnmaster, hzdept_r, hzdepb_r, hzthk_r,
+      mu.mukey, co.cokey, hzname, desgnmaster, hzdept_r, hzdepb_r, hzthk_r,
       ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h,
       ecoclassname, ecoclassid, compname,
       majcompflag, co.comppct_r
@@ -737,7 +738,7 @@ const vegspec = async (req, res) => {
         row.forEach((d, i) => {
           const col = table[0][i];
 
-          if (col !== 'cokey') {
+          if (!/key/.test(col)) {
             obj[col] = Number.isFinite(+d) ? +d : d;
           } else {
             obj[col] = d;
