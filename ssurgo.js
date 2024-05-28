@@ -676,8 +676,10 @@ const vegspec = async (req, res) => {
       ph1to1h2o_l,
       ph1to1h2o_r,
       ph1to1h2o_h,
-      STRING_AGG(${psa ? 'DISTINCT' : ''} texcl, ', ') AS texcl_agg,
+      STRING_AGG(${psa ? 'DISTINCT' : ''} texdesc, ', ') AS texdesc,
+      STRING_AGG(${psa ? 'DISTINCT' : ''} texcl, ', ') AS texcl,
       ecoclassname,
+      ecoclassid,
       compname,
       majcompflag,
       co.comppct_r
@@ -703,11 +705,16 @@ const vegspec = async (req, res) => {
       mu.mukey IS NOT NULL
       AND compkind = 'Series'
       AND hzname IS NOT NULL
+      AND (
+        desgnmaster LIKE '%A%'
+        OR desgnmaster LIKE '%B%'
+        OR desgnmaster LIKE '%E%'
+      )
       AND desgnmaster NOT LIKE '%C%'
     GROUP BY
       co.cokey, hzname, desgnmaster, hzdept_r, hzdepb_r, hzthk_r,
       ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h,
-      ecoclassname, compname,
+      ecoclassname, ecoclassid, compname,
       majcompflag, co.comppct_r
   `;
 
