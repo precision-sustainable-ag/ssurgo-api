@@ -650,22 +650,6 @@ const vegspec = async (req, res) => {
   }
 
   const sq = `
-    WITH MaxComp AS (
-      SELECT
-        co.mukey,
-        MAX(comppct_r) AS max_comppct_r
-      FROM
-        component co
-      GROUP BY
-        co.mukey
-    ),
-    FilteredComponent AS (
-      SELECT
-        co.*
-      FROM
-        component co
-      INNER JOIN MaxComp mc ON co.mukey = mc.mukey AND co.comppct_r = mc.max_comppct_r
-    )
     SELECT
       mu.mukey,
       co.cokey,
@@ -693,7 +677,7 @@ const vegspec = async (req, res) => {
       WHERE mukey = '${mukey}'
     ) mu ON lg.lkey = mu.lkey
     LEFT JOIN
-      FilteredComponent co ON mu.mukey = co.mukey
+      component co ON mu.mukey = co.mukey
     LEFT JOIN
       chorizon ch ON co.cokey = ch.cokey
     LEFT JOIN
@@ -717,6 +701,10 @@ const vegspec = async (req, res) => {
       ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h,
       ecoclassname, ecoclassid, compname,
       majcompflag, co.comppct_r
+    ORDER BY
+      comppct_r DESC,
+      compname,
+      hzdept_r DESC
   `;
 
   let results;
