@@ -35,6 +35,7 @@ app.get('/', (req, res) => {
 });
 
 app.all('/polygon', ssurgo.polygon);
+app.all('/vegspec', ssurgo.vegspec);
 
 app.use(express.static(path.join(__dirname, 'public'))); // make the public folder available
 

@@ -619,7 +619,137 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   }
 }; // polygon
 
+const vegspec = async (req, res) => {
+  const server = req.query.server || 'psa';
+  const psa = server !== 'usda';
+  const { lat, lon } = req.query;
+
+  if (!+lat || !+lon) {
+    res.status(400).send({ error: 'Invalid lat/lon' });
+  }
+
+  let mukey;
+  if (psa) {
+    const query = `
+      SELECT mukey FROM mupolygon
+      WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint($1, $2), 4326), 5070))
+    `;
+
+    // console.log(query);
+    mukey = (await pool.query(query, [lon, lat]))?.rows[0]?.mukey;
+  } else {
+    const query = `SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
+
+    // eslint-disable-next-line prefer-destructuring
+    mukey = (await axios
+      .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+        query,
+        format: 'JSON',
+        encode: 'form',
+      })).data.Table[0][0];
+  }
+
+  const sq = `
+    WITH MaxComp AS (
+      SELECT
+        co.mukey,
+        MAX(comppct_r) AS max_comppct_r
+      FROM
+        component co
+      GROUP BY
+        co.mukey
+    ),
+    FilteredComponent AS (
+      SELECT
+        co.*
+      FROM
+        component co
+      INNER JOIN MaxComp mc ON co.mukey = mc.mukey AND co.comppct_r = mc.max_comppct_r
+    )
+    SELECT 
+      co.cokey,
+      hzname,
+      desgnmaster,
+      hzdept_r,
+      hzdepb_r,
+      hzthk_r,
+      ph1to1h2o_l,
+      ph1to1h2o_r,
+      ph1to1h2o_h,
+      STRING_AGG(${psa ? 'DISTINCT' : ''} texcl, ', ') AS texcl_agg,
+      ecoclassname,
+      compname,
+      majcompflag,
+      co.comppct_r
+    FROM
+      sacatalog sc
+    LEFT JOIN
+      legend lg ON sc.areasymbol = lg.areasymbol
+    LEFT JOIN (
+      SELECT * FROM mapunit
+      WHERE mukey = '${mukey}'
+    ) mu ON lg.lkey = mu.lkey
+    LEFT JOIN
+      FilteredComponent co ON mu.mukey = co.mukey
+    LEFT JOIN
+      chorizon ch ON co.cokey = ch.cokey
+    LEFT JOIN
+      chtexturegrp ctg ON ch.chkey = ctg.chkey
+    LEFT JOIN
+      chtexture ct ON ctg.chtgkey = ct.chtgkey
+    LEFT JOIN
+      coecoclass ON co.cokey = coecoclass.cokey
+    WHERE
+      mu.mukey IS NOT NULL
+      AND compkind = 'Series'
+      AND hzname IS NOT NULL
+      AND desgnmaster NOT LIKE '%C%'
+    GROUP BY
+      co.cokey, hzname, desgnmaster, hzdept_r, hzdepb_r, hzthk_r,
+      ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h,
+      ecoclassname, compname,
+      majcompflag, co.comppct_r
+  `;
+
+  let results;
+  if (psa) {
+    results = await pool.query(sq);
+  } else {
+    const data = await axios
+      .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+        query: sq,
+        format: 'JSON+COLUMNNAME',
+        encode: 'form',
+      });
+
+    const data1 = [];
+    const table = data.data.Table || [];
+    if (table.length) {
+      table.slice(1).forEach((row) => {
+        const obj = {};
+        row.forEach((d, i) => {
+          const col = table[0][i];
+
+          if (col !== 'cokey') {
+            obj[col] = Number.isFinite(+d) ? +d : d;
+          } else {
+            obj[col] = d;
+          }
+        });
+        data1.push(obj);
+      });
+    }
+
+    results = {
+      rows: data1,
+    };
+  }
+
+  res.send(results.rows);
+}; // vegspec
+
 module.exports = {
   ssurgo,
   polygon,
+  vegspec,
 };
