@@ -688,7 +688,7 @@ const vegspec = async (req, res) => {
       coecoclass ON co.cokey = coecoclass.cokey
     WHERE
       mu.mukey IS NOT NULL
-      AND compkind = 'Series'
+      AND compkind in ('Series', 'Family', 'Taxadjunct')
     GROUP BY
       mu.mukey, co.cokey, hzname, desgnmaster, hzdept_r, hzdepb_r, hzthk_r,
       ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h,
@@ -705,6 +705,7 @@ const vegspec = async (req, res) => {
   //   desgnmaster LIKE '%A%'
   //   OR desgnmaster LIKE '%B%'
   //   OR desgnmaster LIKE '%E%'
+  //   OR desgnmaster LIKE '%H%'
   // )
   // AND desgnmaster NOT LIKE '%C%'
 
@@ -728,7 +729,7 @@ const vegspec = async (req, res) => {
         row.forEach((d, i) => {
           const col = table[0][i];
 
-          if (!/key/.test(col)) {
+          if (d !== null && !/key/.test(col)) {
             obj[col] = Number.isFinite(+d) ? +d : d;
           } else {
             obj[col] = d;
