@@ -689,13 +689,6 @@ const vegspec = async (req, res) => {
     WHERE
       mu.mukey IS NOT NULL
       AND compkind = 'Series'
-      AND hzname IS NOT NULL
-      AND (
-        desgnmaster LIKE '%A%'
-        OR desgnmaster LIKE '%B%'
-        OR desgnmaster LIKE '%E%'
-      )
-      AND desgnmaster NOT LIKE '%C%'
     GROUP BY
       mu.mukey, co.cokey, hzname, desgnmaster, hzdept_r, hzdepb_r, hzthk_r,
       ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h,
@@ -707,6 +700,15 @@ const vegspec = async (req, res) => {
       hzdept_r
   `;
 
+  // AND hzname IS NOT NULL
+  // AND (
+  //   desgnmaster LIKE '%A%'
+  //   OR desgnmaster LIKE '%B%'
+  //   OR desgnmaster LIKE '%E%'
+  // )
+  // AND desgnmaster NOT LIKE '%C%'
+
+  console.log(sq);
   let results;
   if (psa) {
     results = await pool.query(sq);
