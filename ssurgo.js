@@ -553,6 +553,23 @@ const ssurgo = (req, res) => {
   }
 }; // ssurgo
 
+const wktToGeoJSON = (wkt) => {
+  const geojson = {
+    type: 'Polygon',
+    coordinates: [],
+  };
+  const matches = wkt.match(/POLYGON\s*\(\((.*)\)\)/);
+
+  if (matches) {
+    const coordinates = matches[1].split(', ').map((point) => {
+      const [lon, lat] = point.split(' ').map(Number);
+      return [lon, lat];
+    });
+    geojson.coordinates.push(coordinates);
+  }
+  return geojson;
+}; // wktToGeoJSON
+
 const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   const { lat, lon } = req.query;
 
@@ -571,13 +588,13 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
       })
       .then((data) => {
         const result = (data.data.Table || []).map((d) => {
-          const [lon2, lat2, mukey, polygon2, polygonarray] = d;
+          const [lon2, lat2, mukey, polygon2] = d;
           return {
             lon: lon2,
             lat: lat2,
             mukey,
             polygon: polygon2,
-            polygonarray,
+            polygonarray: [wktToGeoJSON(polygon2).coordinates],
           };
         });
 
