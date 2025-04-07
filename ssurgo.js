@@ -636,6 +636,55 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   }
 }; // polygon
 
+const mapunits = async (req, res) => {
+  try {
+    const { points } = req.body; // expecting [{ lat, lon }, ...]
+    console.log(points);
+    if (!Array.isArray(points) || points.length === 0) {
+      return res.status(400).send({ error: 'Missing or invalid "points" array' });
+    }
+
+    const valuesSql = points
+      .map((p) => `(${parseFloat(p.lon)}, ${parseFloat(p.lat)})`)
+      .join(',\n');
+
+    const query = `
+      SELECT 
+        pt.lon,
+        pt.lat,
+        c.mukey,
+        c.compname,
+        c.comppct_r
+      FROM (
+        VALUES
+          ${valuesSql}
+      ) AS pt(lon, lat)
+      CROSS JOIN LATERAL (
+        SELECT ST_Transform(ST_SetSRID(ST_MakePoint(pt.lon, pt.lat), 4326), 5070) AS geom
+      ) AS g
+      JOIN mupolygon p
+        ON p.shape && g.geom
+        AND ST_Contains(p.shape, g.geom)
+      JOIN component c
+        ON c.mukey = p.mukey
+      WHERE c.comppct_r = (
+        SELECT MAX(c2.comppct_r)
+        FROM component c2
+        WHERE c2.mukey = p.mukey
+      )
+      AND LOWER(c.compname) NOT IN ('notcom', 'miscellaneous area', 'unknown', 'undefined');
+    `;
+
+    const results = await pool.query(query);
+
+    res.send(results.rows);
+  } catch (err) {
+    console.error('mapunits error:', err);
+    res.status(500).send({ error: 'Internal server error' });
+  }
+  return false;
+}; // mapunits
+
 const vegspec = async (req, res) => {
   const server = req.query.server || 'psa';
   const psa = server !== 'usda';
@@ -766,6 +815,7 @@ const vegspec = async (req, res) => {
 
 module.exports = {
   ssurgo,
+  mapunits,
   polygon,
   vegspec,
 };
