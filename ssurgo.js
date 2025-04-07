@@ -503,29 +503,32 @@ const ssurgo = (req, res) => {
     });
 
   if (psa) {
-    const query = polygon
-      ? `
-        SELECT mukey FROM mupolygon
-        WHERE ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_MakePolygon('LINESTRING(${polygon})'), 4326), 5070))
-      `
-      : `
-        SELECT mukey FROM mupolygon
-        WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
-      `;
+    if (mukey) {
+      ssurgo1();
+    } else {
+      const query = polygon
+        ? `
+          SELECT mukey FROM mupolygon
+          WHERE ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_MakePolygon('LINESTRING(${polygon})'), 4326), 5070))
+        `
+        : `
+          SELECT mukey FROM mupolygon
+          WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
+        `;
 
-    // console.log(query);
-    pool.query(
-      query,
-      (error, results) => {
-        if (error) {
-          console.log(error);
-          res.status(400).send(error);
-        } else {
-          mukey = results.rows.map((row) => `'${row.mukey}'`);
-          ssurgo1();
-        }
-      },
-    );
+      pool.query(
+        query,
+        (error, results) => {
+          if (error) {
+            console.log(error);
+            res.status(400).send(error);
+          } else {
+            mukey = results.rows.map((row) => `'${row.mukey}'`);
+            ssurgo1();
+          }
+        },
+      );
+    }
   } else {
     const query = polygon
       ? `SELECT mukey from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')`
@@ -639,7 +642,7 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
 const mapunits = async (req, res) => {
   try {
     const { points } = req.body; // expecting [{ lat, lon }, ...]
-    console.log(points);
+
     if (!Array.isArray(points) || points.length === 0) {
       return res.status(400).send({ error: 'Missing or invalid "points" array' });
     }
