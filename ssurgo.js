@@ -553,6 +553,23 @@ const ssurgo = (req, res) => {
   }
 }; // ssurgo
 
+const wktToGeoJSON = (wkt) => {
+  const geojson = {
+    type: 'Polygon',
+    coordinates: [],
+  };
+  const matches = wkt.match(/POLYGON\s*\(\((.*)\)\)/);
+
+  if (matches) {
+    const coordinates = matches[1].split(', ').map((point) => {
+      const [lon, lat] = point.split(' ').map(Number);
+      return [lon, lat];
+    });
+    geojson.coordinates.push(coordinates);
+  }
+  return geojson;
+}; // wktToGeoJSON
+
 const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
   const { lat, lon } = req.query;
 
@@ -571,13 +588,13 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
       })
       .then((data) => {
         const result = (data.data.Table || []).map((d) => {
-          const [lon2, lat2, mukey, polygon2, polygonarray] = d;
+          const [lon2, lat2, mukey, polygon2] = d;
           return {
             lon: lon2,
             lat: lat2,
             mukey,
             polygon: polygon2,
-            polygonarray,
+            polygonarray: [wktToGeoJSON(polygon2).coordinates],
           };
         });
 
@@ -618,6 +635,55 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
     );
   }
 }; // polygon
+
+const mapunits = async (req, res) => {
+  try {
+    const { points } = req.body; // expecting [{ lat, lon }, ...]
+    console.log(points);
+    if (!Array.isArray(points) || points.length === 0) {
+      return res.status(400).send({ error: 'Missing or invalid "points" array' });
+    }
+
+    const valuesSql = points
+      .map((p) => `(${parseFloat(p.lon)}, ${parseFloat(p.lat)})`)
+      .join(',\n');
+
+    const query = `
+      SELECT 
+        pt.lon,
+        pt.lat,
+        c.mukey,
+        c.compname,
+        c.comppct_r
+      FROM (
+        VALUES
+          ${valuesSql}
+      ) AS pt(lon, lat)
+      CROSS JOIN LATERAL (
+        SELECT ST_Transform(ST_SetSRID(ST_MakePoint(pt.lon, pt.lat), 4326), 5070) AS geom
+      ) AS g
+      JOIN mupolygon p
+        ON p.shape && g.geom
+        AND ST_Contains(p.shape, g.geom)
+      JOIN component c
+        ON c.mukey = p.mukey
+      WHERE c.comppct_r = (
+        SELECT MAX(c2.comppct_r)
+        FROM component c2
+        WHERE c2.mukey = p.mukey
+      )
+      AND LOWER(c.compname) NOT IN ('notcom', 'miscellaneous area', 'unknown', 'undefined');
+    `;
+
+    const results = await pool.query(query);
+
+    res.send(results.rows);
+  } catch (err) {
+    console.error('mapunits error:', err);
+    res.status(500).send({ error: 'Internal server error' });
+  }
+  return false;
+}; // mapunits
 
 const vegspec = async (req, res) => {
   const server = req.query.server || 'psa';
@@ -688,14 +754,7 @@ const vegspec = async (req, res) => {
       coecoclass ON co.cokey = coecoclass.cokey
     WHERE
       mu.mukey IS NOT NULL
-      AND compkind = 'Series'
-      AND hzname IS NOT NULL
-      AND (
-        desgnmaster LIKE '%A%'
-        OR desgnmaster LIKE '%B%'
-        OR desgnmaster LIKE '%E%'
-      )
-      AND desgnmaster NOT LIKE '%C%'
+      AND compkind in ('Series', 'Family', 'Taxadjunct')
     GROUP BY
       mu.mukey, co.cokey, hzname, desgnmaster, hzdept_r, hzdepb_r, hzthk_r,
       ph1to1h2o_l, ph1to1h2o_r, ph1to1h2o_h,
@@ -704,9 +763,19 @@ const vegspec = async (req, res) => {
     ORDER BY
       comppct_r DESC,
       compname,
-      hzdept_r DESC
+      hzdept_r
   `;
 
+  // AND hzname IS NOT NULL
+  // AND (
+  //   desgnmaster LIKE '%A%'
+  //   OR desgnmaster LIKE '%B%'
+  //   OR desgnmaster LIKE '%E%'
+  //   OR desgnmaster LIKE '%H%'
+  // )
+  // AND desgnmaster NOT LIKE '%C%'
+
+  console.log(sq);
   let results;
   if (psa) {
     results = await pool.query(sq);
@@ -726,7 +795,7 @@ const vegspec = async (req, res) => {
         row.forEach((d, i) => {
           const col = table[0][i];
 
-          if (!/key/.test(col)) {
+          if (d !== null && !/key/.test(col)) {
             obj[col] = Number.isFinite(+d) ? +d : d;
           } else {
             obj[col] = d;
@@ -746,6 +815,7 @@ const vegspec = async (req, res) => {
 
 module.exports = {
   ssurgo,
+  mapunits,
   polygon,
   vegspec,
 };
