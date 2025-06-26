@@ -2,6 +2,7 @@ const axios = require('axios');
 const { pool } = require('./pools');
 
 const ssurgo = (req, res) => {
+  const localhost = req.get('host') === 'localhost';
   let where;
   let data1;
   let query1;
@@ -412,8 +413,10 @@ const ssurgo = (req, res) => {
 
     query1 = doFilter(query1);
     // query1 = `${query1} ORDER BY 1, 2`;
-    console.log('query1');
-    console.log(query1);
+    if (localhost) {
+      console.log('query1');
+      console.log(query1.replace(/[\n\r]\s+/g, '\n'));
+    }
 
     if (output === 'query') {
       res.status(200).send(query1);
@@ -503,29 +506,32 @@ const ssurgo = (req, res) => {
     });
 
   if (psa) {
-    const query = polygon
-      ? `
-        SELECT mukey FROM mupolygon
-        WHERE ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_MakePolygon('LINESTRING(${polygon})'), 4326), 5070))
-      `
-      : `
-        SELECT mukey FROM mupolygon
-        WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
-      `;
+    if (mukey) {
+      ssurgo1();
+    } else {
+      const query = polygon
+        ? `
+          SELECT mukey FROM mupolygon
+          WHERE ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_MakePolygon('LINESTRING(${polygon})'), 4326), 5070))
+        `
+        : `
+          SELECT mukey FROM mupolygon
+          WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
+        `;
 
-    // console.log(query);
-    pool.query(
-      query,
-      (error, results) => {
-        if (error) {
-          console.log(error);
-          res.status(400).send(error);
-        } else {
-          mukey = results.rows.map((row) => `'${row.mukey}'`);
-          ssurgo1();
-        }
-      },
-    );
+      pool.query(
+        query,
+        (error, results) => {
+          if (error) {
+            console.log(error);
+            res.status(400).send(error);
+          } else {
+            mukey = results.rows.map((row) => `'${row.mukey}'`);
+            ssurgo1();
+          }
+        },
+      );
+    }
   } else {
     const query = polygon
       ? `SELECT mukey from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')`
@@ -571,6 +577,7 @@ const wktToGeoJSON = (wkt) => {
 }; // wktToGeoJSON
 
 const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
+  const localhost = req.get('host') === 'localhost';
   const { lat, lon } = req.query;
 
   if (req.query.server === 'usda') {
@@ -628,7 +635,9 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
           console.log(error);
           res.status(400).send(error);
         } else {
-          console.log(results.rows);
+          if (localhost) {
+            console.log(results.rows);
+          }
           res.send(results.rows);
         }
       },
@@ -639,7 +648,7 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
 const mapunits = async (req, res) => {
   try {
     const { points } = req.body; // expecting [{ lat, lon }, ...]
-    console.log(points);
+
     if (!Array.isArray(points) || points.length === 0) {
       return res.status(400).send({ error: 'Missing or invalid "points" array' });
     }
@@ -686,6 +695,7 @@ const mapunits = async (req, res) => {
 }; // mapunits
 
 const vegspec = async (req, res) => {
+  const localhost = req.get('host') === 'localhost';
   const server = req.query.server || 'psa';
   const psa = server !== 'usda';
   const { lat, lon } = req.query;
@@ -775,7 +785,9 @@ const vegspec = async (req, res) => {
   // )
   // AND desgnmaster NOT LIKE '%C%'
 
-  console.log(sq);
+  if (localhost) {
+    console.log(sq);
+  }
   let results;
   if (psa) {
     results = await pool.query(sq);
