@@ -1,4 +1,3 @@
-console.log('test');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -13,6 +12,8 @@ process.on('uncaughtException', (err) => {
 });
 
 const express = require('express'); // simplifies http server development
+const open = require('open');
+
 const bodyParser = require('body-parser'); // make form data available in req.body
 const cors = require('cors'); // allow cross-origin requests
 const path = require('path'); // to get the current path
@@ -43,6 +44,10 @@ app.use(express.static(path.join(__dirname, 'public'))); // make the public fold
 
 app.use(express.static(`${__dirname}/static`, { dotfiles: 'allow' })); // from Ayaan
 
-app.listen(80);
+app.listen(80, () => {
+  if (process.argv.includes('dev')) {
+    open('http://localhost');
+  }
+});
 
 console.log('Running!');

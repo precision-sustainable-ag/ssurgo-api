@@ -1,7 +1,8 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  user: process.env.USER,
+  // user: process.env.USER,  // ignored in WSL :(
+  user: 'ssurgo_admin',
   password: process.env.PASSWORD,
   host: process.env.HOST,
   database: process.env.DATABASE,

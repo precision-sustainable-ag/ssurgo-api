@@ -2,7 +2,7 @@ const axios = require('axios');
 const { pool } = require('./pools');
 
 const ssurgo = (req, res) => {
-  const localhost = req.get('host') === 'localhost';
+  const localhost = /localhost/.test(req.get('host'));
   let where;
   let data1;
   let query1;
