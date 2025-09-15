@@ -2,10 +2,6 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const ip = require('ip');
-
-console.log('IP:', ip.address()); // if needed for /etc/postgresql/11/main/pg_hba.conf
-
 process.on('uncaughtException', (err) => {
   console.error(err);
   console.log('Node NOT Exiting...');
