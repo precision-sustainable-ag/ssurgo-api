@@ -1,8 +1,9 @@
-const axios = require('axios');
-const { pool } = require('./pools');
+import axios from 'axios';
 
-const ssurgo = (req, res) => {
-  const localhost = /localhost/.test(req.get('host'));
+import { pool } from './pools.js';
+
+const ssurgo = (req, reply) => {
+  const localhost = /localhost/.test(req.headers.host);
   let where;
   let data1;
   let query1;
@@ -152,17 +153,19 @@ const ssurgo = (req, res) => {
       if (req.callback) {
         req.callback(data);
       } else {
-        res.status(200).send(data);
+        reply.send(data);
       }
     } else if (output === 'csv') {
-      res.set('Content-Type', 'text/csv');
-      res.setHeader('Content-disposition', `attachment; filename=SSURGO.csv`);
       const result = `
         ${Object.keys(data[0])}
         ${data.map((row) => Object.values(row).map((d) => (d ?? '').toString().replace(/^.*,.*$/g, (s) => `"${s}"`))).join('\n')}
       `.trim();
 
-      res.status(200).send(result);
+      reply
+        .type('text/csv; charset=utf-8')
+        .header('Content-Disposition', 'attachment; filename="SSURGO.csv"')
+        .send(result);
+
     } else if (output === 'html') {
       const s = `
         <style>
@@ -190,21 +193,20 @@ const ssurgo = (req, res) => {
         </table>
       `;
 
-      res.status(200).send(s);
+      reply.send(s);
     }
   }; // doOutput
 
   const outputData = () => {
     if (data1.length > 10000) {
-      res.status(400).send({ ERROR: 'Too many rows' });
-      return;
+      return reply.code(400).send({ ERROR: 'Too many rows' });
     }
 
     if (!data1.length) {
       if (req.callback) {
         req.callback([]);
       } else {
-        res.status(400).send({ ERROR: 'No data found' });
+        return reply.code(400).send({ ERROR: 'No data found' });
       }
     } else {
       if (req.query.component === 'max') {
@@ -419,14 +421,14 @@ const ssurgo = (req, res) => {
     }
 
     if (output === 'query') {
-      res.status(200).send(query1);
+      reply.send(query1);
     } else if (psa) {
       pool.query(
         query1,
         (error, results) => {
           if (error) {
             console.log(error);
-            res.status(400).send(error);
+            reply.code(400).send(error);
           } else {
             data1 = results.rows;
             outputData();
@@ -457,14 +459,13 @@ const ssurgo = (req, res) => {
           console.log('ssurgo', query1);
           console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
           console.error('ssurgo', query1);
-          res.status(400).send(error);
+          reply.code(400).send(error);
         });
     }
   }; // ssurgo1
 
   if (!req.query.lat && !req.query.mukey && !req.query.polygon) {
-    res.sendFile(`${__dirname}/public/index.html`);
-    return;
+    return reply.type('text/html').sendFile('index.html');
   }
 
   let { polygon } = req.query;
@@ -490,8 +491,7 @@ const ssurgo = (req, res) => {
   }
 
   if ((!+lat || !+lon) && !mukey && !polygon) {
-    res.status(400).send('lat/lon, mukey, or polygon required');
-    return;
+    return reply.code(400).send('lat/lon, mukey, or polygon required');
   }
 
   ((req.query.categories || '').match(/[ -][a-z]+/g) || [])
@@ -524,7 +524,7 @@ const ssurgo = (req, res) => {
         (error, results) => {
           if (error) {
             console.log(error);
-            res.status(400).send(error);
+            reply.code(400).send(error);
           } else {
             mukey = results.rows.map((row) => `'${row.mukey}'`);
             ssurgo1();
@@ -545,7 +545,6 @@ const ssurgo = (req, res) => {
         encode: 'form',
       })
       .then((data) => {
-        // eslint-disable-next-line prefer-destructuring
         mukey = data.data.Table.map((row) => `'${row[0]}'`);
         ssurgo1();
       })
@@ -554,7 +553,7 @@ const ssurgo = (req, res) => {
         console.log('ssurgo', query);
         console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
         console.error('ssurgo', query);
-        res.status(400).send(error);
+        reply.code(400).send(error);
       });
   }
 }; // ssurgo
@@ -576,8 +575,8 @@ const wktToGeoJSON = (wkt) => {
   return geojson;
 }; // wktToGeoJSON
 
-const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
-  const localhost = req.get('host') === 'localhost';
+const polygon = (req, reply) => { // SLOW, and often causes 400 or 500 error
+  const localhost = /localhost/.test(req.headers.host);
   const { lat, lon } = req.query;
 
   if (req.query.server === 'usda') {
@@ -605,14 +604,14 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
           };
         });
 
-        res.send(result);
+        reply.send(result);
       })
       .catch((error) => {
         console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
         console.log('ssurgo', query);
         console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
         console.error('ssurgo', query);
-        res.status(400).send(error);
+        reply.code(400).send(error);
       });
   } else {
     const query = `
@@ -633,24 +632,24 @@ const polygon = (req, res) => { // SLOW, and often causes 400 or 500 error
       (error, results) => {
         if (error) {
           console.log(error);
-          res.status(400).send(error);
+          reply.code(400).send(error);
         } else {
           if (localhost) {
             console.log(results.rows);
           }
-          res.send(results.rows);
+          reply.send(results.rows);
         }
       },
     );
   }
 }; // polygon
 
-const mapunits = async (req, res) => {
+const mapunits = async (req, reply) => {
   try {
     const { points } = req.body; // expecting [{ lat, lon }, ...]
 
     if (!Array.isArray(points) || points.length === 0) {
-      return res.status(400).send({ error: 'Missing or invalid "points" array' });
+      return reply.code(400).send({ error: 'Missing or invalid "points" array' });
     }
 
     const valuesSql = points
@@ -686,22 +685,21 @@ const mapunits = async (req, res) => {
 
     const results = await pool.query(query);
 
-    res.send(results.rows);
+    return results.rows;
   } catch (err) {
     console.error('mapunits error:', err);
-    res.status(500).send({ error: 'Internal server error' });
+    reply.code(500).send({ error: 'Internal server error' });
   }
-  return false;
 }; // mapunits
 
-const vegspec = async (req, res) => {
-  const localhost = req.get('host') === 'localhost';
+const vegspec = async (req, reply) => {
+  const localhost = /localhost/.test(req.headers.host);
   const server = req.query.server || 'psa';
   const psa = server !== 'usda';
   const { lat, lon } = req.query;
 
   if (!+lat || !+lon) {
-    res.status(400).send({ error: 'Invalid lat/lon' });
+    return reply.code(400).send({ error: 'Invalid lat/lon' });
   }
 
   let mukey;
@@ -716,7 +714,6 @@ const vegspec = async (req, res) => {
   } else {
     const query = `SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
 
-    // eslint-disable-next-line prefer-destructuring
     mukey = (await axios
       .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
         query,
@@ -822,10 +819,10 @@ const vegspec = async (req, res) => {
     };
   }
 
-  res.send(results.rows);
+  return results.rows;
 }; // vegspec
 
-module.exports = {
+export {
   ssurgo,
   mapunits,
   polygon,

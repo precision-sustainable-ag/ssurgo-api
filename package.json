@@ -3,19 +3,20 @@
   "version": "1.0.0",
   "description": "weather-api",
   "main": "index.js",
+  "type": "module",
   "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@fastify/formbody": "^8.0.2",
+    "@fastify/static": "^8.2.0",
     "axios": "^1.12.2",
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^4.21.2",
+    "fastify": "^5.6.1",
     "open": "^8.4.2",
     "pg": "^8.16.3"
   },
   "scripts": {
-    "start": "node index.js",
-    "build": "cd public/client && npm install && npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",

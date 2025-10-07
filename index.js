@@ -1,49 +1,64 @@
-const dotenv = require('dotenv');
+import { fileURLToPath } from 'node:url';
+import path from 'path';
+import dns from 'node:dns';
 
-dotenv.config();
+import open from 'open';
+import fastifyFactory from 'fastify';
+import cors from '@fastify/cors';
+import formbody from '@fastify/formbody';
+import staticPlugin from '@fastify/static';
+
+import { ssurgo, mapunits, polygon, vegspec } from './ssurgo.js';
+
+dns.setDefaultResultOrder('ipv4first');
 
 process.on('uncaughtException', (err) => {
   console.error(err);
   console.log('Node NOT Exiting...');
 });
 
-const express = require('express'); // simplifies http server development
-const open = require('open');
-
-const bodyParser = require('body-parser'); // make form data available in req.body
-const cors = require('cors'); // allow cross-origin requests
-const path = require('path'); // to get the current path
-
-const app = express();
-
-app.use(cors());
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-
-app.use((err, req, res, next) => { // next is unused but required??!
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+const app = fastifyFactory({
+  trustProxy: true,
+  logger: true,
+  bodyLimit: 50 * 1024 * 1024,
 });
 
-const ssurgo = require('./ssurgo');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);  
 
-app.get('/', (req, res) => {
-  console.log(req.query);
-  ssurgo.ssurgo(req, res);
+// Plugins
+await app.register(cors);
+await app.register(formbody);       // x-www-form-urlencoded
+
+// Static assets (public at '/')
+await app.register(staticPlugin, {
+  root: path.join(__dirname, 'public'),
+  prefix: '/',
+  index: ['index.html'],
+  etag: true,
+  lastModified: true,
+  serveDotFiles: true,
 });
 
-app.all('/polygon', ssurgo.polygon);
-app.all('/mapunits', ssurgo.mapunits);
-app.all('/vegspec', ssurgo.vegspec);
+// Error handling
+app.setErrorHandler((err, _req, reply) => {
+  app.log.error(err);
+  reply.code(500).send('Something broke!');
+});
 
-app.use(express.static(path.join(__dirname, 'public'))); // make the public folder available
+// Routes
+app.get('/', ssurgo);
+app.all('/polygon', polygon);
+app.all('/mapunits', mapunits);
+app.all('/vegspec', vegspec);
 
-app.use(express.static(`${__dirname}/static`, { dotfiles: 'allow' })); // from Ayaan
-
-app.listen(80, () => {
+// Start
+app.listen({ port: 80, host: '0.0.0.0' }).then(() => {
   if (process.argv.includes('dev')) {
-    open('http://localhost');
+    open('http://localhost').catch(() => {});
   }
+  app.log.info('Running!');
+}).catch((err) => {
+  app.log.error(err);
+  process.exit(1);
 });
-
-console.log('Running!');
