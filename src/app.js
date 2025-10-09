@@ -163,7 +163,7 @@ const setup = async ({
         document.addEventListener('click', click);
 
         click();
-      }
+      },
     },
     theme: {
       title,
@@ -172,7 +172,7 @@ const setup = async ({
         rel: 'icon',
         sizes: 'any',
         type: 'image/x-icon',
-        content: ico
+        content: ico,
       }],
       css: [{
         content: `
@@ -189,14 +189,58 @@ const setup = async ({
             top: 5vh;
             box-shadow: 0 0 0 5vw rgba(0, 0, 0, 0.6);
           }
-        `
-      }]
-    }
+        `,
+      }],
+    },
   });
 
   for (const [name, plugin] of Object.entries(plugins)) {
     await app.register(plugin, { prefix: `/${name}` });
   }
+
+  app.get('/redoc', async (req, reply) => {
+    // Use a relative spec-url so this works behind proxies and on any host
+    const html = `<!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8"/>
+      <title>API Docs – ReDoc</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <style>
+        body { margin:0; padding:0; }
+        .topbar {
+          position: fixed; z-index: 10; top: 0; left: 0; right: 0;
+          height: 44px; display: flex; align-items: center; gap: 12px;
+          padding: 0 12px; border-bottom: 1px solid #eee; background: #fff;
+          font: 500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        }
+        .content { margin-top: 44px; }
+        .btn { padding: 6px 10px; border: 1px solid #ddd; border-radius: 8px; text-decoration: none; color: #111; }
+        ul[role="menu"] > li:last-of-type { display: none; }  /* hide redoc route in left pane */
+        div[data-section-id]:last-of-type { display: none; }  /* hide redoc route in middle pane */
+      </style>
+    </head>
+    <body>
+      <div class="topbar">
+        <span>ReDoc</span>
+        <a class="btn" href="/docs">Try it (Swagger UI)</a>
+        <a class="btn" href="/docs/json">OpenAPI JSON</a>
+      </div>
+      <div class="content">
+        <redoc
+          spec-url="/docs/json"
+          suppress-warnings
+          hide-download-button
+          expand-responses=""
+          path-in-middle-panel
+        >
+        </redoc>
+      </div>
+      <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+    </body>
+  </html>`;
+    reply.type('text/html').send(html);
+  });
 
   await app.register(staticPlugin, {
     root: path.join(__dirname, '../public'),

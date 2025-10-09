@@ -1,9 +1,14 @@
-export const main = (req, reply) => {
-  const localhost = /localhost/.test(req.headers.host);
+import axios from 'axios';
+
+import { pool } from './pools.js';
+
+// !!! callback?
+
+export const ssurgo = async (lat, lon, mukey, server, categories, component, filter, showseriesonly, polygon, output, reply) => {
   let where;
   let data1;
   let query1;
-  const server = req.query.server || 'psa';
+  server = server || 'psa';
   const psa = server !== 'usda';
   const joinType = 'LEFT';
 
@@ -12,8 +17,7 @@ export const main = (req, reply) => {
   let minlon;
   let maxlon;
 
-  let mukey = req.query.mukey ? req.query.mukey.split(',').map((m) => `'${m}'`).join(',') : null;
-  const output = req.query.output || 'json';
+  mukey = mukey ? mukey.split(',').map((m) => `'${m}'`).join(',') : null;
 
   let cats = [
     '+legend',
@@ -33,8 +37,8 @@ export const main = (req, reply) => {
     '-coecoclass',
   ];
 
-  if ((req.query.categories || '').includes('clear')) {
-    req.query.categories = req.query.categories.replace(/clear/g, '');
+  if ((categories || '').includes('clear')) {
+    categories = categories.replace(/clear/g, '');
     cats = [
       '-legend',
       '-mapunit',
@@ -56,10 +60,10 @@ export const main = (req, reply) => {
 
   const test = (category) => category.split('|').some((t) => cats.includes(`+${t}`));
 
-  const lat = req.query.lat ? (+req.query.lat).toFixed(4) : 'NULL';
-  const lon = req.query.lon ? (+req.query.lon).toFixed(4) : 'NULL';
+  lat = lat ? (+lat).toFixed(4) : 'NULL';
+  lon = lon ? (+lon).toFixed(4) : 'NULL';
 
-  const filter = (req.query.filter || '').split(',');
+  filter = (filter || '').split(',');
   const parms = {
     sacatalog: psa
       ? [
@@ -144,80 +148,27 @@ export const main = (req, reply) => {
     return query;
   }; // doFilter
 
-  const doOutput = (data) => {
-    if (output === 'json') {
-      if (req.callback) {
-        req.callback(data);
-      } else {
-        reply.send(data);
-      }
-    } else if (output === 'csv') {
-      const result = `
-        ${Object.keys(data[0])}
-        ${data.map((row) => Object.values(row).map((d) => (d ?? '').toString().replace(/^.*,.*$/g, (s) => `"${s}"`))).join('\n')}
-      `.trim();
-
-      reply
-        .type('text/csv; charset=utf-8')
-        .header('Content-Disposition', 'attachment; filename="SSURGO.csv"')
-        .send(result);
-
-    } else if (output === 'html') {
-      const s = `
-        <style>
-          table {
-            border: 1px solid black;
-            border-spacing: 0; 
-            empty-cells: show;
-            white-space: nowrap;
-            font: 13px arial;
-          }
-
-          td, th {
-            padding: 0.2em 0.5em;
-            border-right: 1px solid #ddd;
-            border-bottom: 1px solid #bbb;
-          }
-        </style>
-        <table id="Data">
-          <thead>
-            <tr><th>${Object.keys(data[0]).join('<th>')}
-          </thead>
-          <tbody>
-            <tr>${data.map((row) => `<td>${Object.values(row).join('<td>')}`).join('<tr>')}
-          </tbody>
-        </table>
-      `;
-
-      reply.send(s);
-    }
-  }; // doOutput
-
   const outputData = () => {
     if (data1.length > 10000) {
       return reply.code(400).send({ ERROR: 'Too many rows' });
     }
 
     if (!data1.length) {
-      if (req.callback) {
-        req.callback([]);
-      } else {
-        return reply.code(400).send({ ERROR: 'No data found' });
-      }
+      return reply.code(400).send({ ERROR: 'No data found' });
     } else {
-      if (req.query.component === 'max') {
+      if (component === 'max') {
         const col = data1[0].indexOf('comppct_r');
         const mcol = data1[0].indexOf('mukey');
 
-        let max = req.query.mukey ? {} : -Infinity;
+        let max = mukey ? {} : -Infinity;
 
-        if (req.query.mukey) {
-          req.query.mukey.split(',').forEach((key) => { max[key] = -Infinity; });
+        if (mukey) {
+          mukey.split(',').forEach((key) => { max[key] = -Infinity; });
         }
 
         data1.slice(1).forEach((row) => {
           const key = row[mcol];
-          if (req.query.mukey) {
+          if (mukey) {
             max[key] = Math.max(max[key], +row[col]);
           } else {
             max = Math.max(max, +row[col]);
@@ -230,11 +181,11 @@ export const main = (req, reply) => {
         });
       }
 
-      doOutput(data1);
+      return data1;
     }
   }; // outputData
 
-  const ssurgo1 = () => {
+  const ssurgo1 = async () => {
     const attr = [];
 
     if (lat !== 'NULL') {
@@ -370,7 +321,7 @@ export const main = (req, reply) => {
 
     let seriesOnly;
 
-    if (req.query.showseriesonly === 'false') {
+    if (showseriesonly === 'false') {
       seriesOnly = '';
     } else if (test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass')) {
       seriesOnly = `AND compkind='Series' `;
@@ -405,66 +356,42 @@ export const main = (req, reply) => {
       ${seriesOnly}
     `;
 
-    if (/^\s*(major|max)\s*$/.test(req.query.component)) {
+    if (/^\s*(major|max)\s*$/.test(component)) {
       query1 += ` and majcompflag='Yes'`;
     }
 
     query1 = doFilter(query1);
-    // query1 = `${query1} ORDER BY 1, 2`;
-    if (localhost) {
-      console.log('query1');
-      console.log(query1.replace(/[\n\r]\s+/g, '\n'));
-    }
 
     if (output === 'query') {
       reply.send(query1);
     } else if (psa) {
-      pool.query(
-        query1,
-        (error, results) => {
-          if (error) {
-            console.log(error);
-            reply.code(400).send(error);
-          } else {
-            data1 = results.rows;
-            outputData();
-          }
-        },
-      );
+      const { rows } = await pool.query(query1);
+      data1 = rows;
+      return outputData();
     } else {
-      axios
-        .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
-          query: query1,
-          format: 'JSON+COLUMNNAME',
-          encode: 'form',
-        })
-        .then((data) => {
-          data1 = [];
-          const table = data.data.Table || [];
-          if (table.length) {
-            table.slice(1).forEach((row) => {
-              const obj = {};
-              row.forEach((d, i) => { obj[table[0][i]] = d; });
-              data1.push(obj);
-            });
-          }
-          outputData();
-        })
-        .catch((error) => {
-          console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-          console.log('ssurgo', query1);
-          console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-          console.error('ssurgo', query1);
-          reply.code(400).send(error);
+      const data = await axios.post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+        query: query1,
+        format: 'JSON+COLUMNNAME',
+        encode: 'form',
+      });
+      
+      data1 = [];
+      const table = data.data.Table || [];
+      if (table.length) {
+        table.slice(1).forEach((row) => {
+          const obj = {};
+          row.forEach((d, i) => { obj[table[0][i]] = d; });
+          data1.push(obj);
         });
+      }
+      return outputData();
     }
   }; // ssurgo1
 
-  if (!req.query.lat && !req.query.mukey && !req.query.polygon) {
+  if ((!+lat || !+lon) && !mukey && !polygon) {
     return reply.type('text/html').sendFile('index.html');
   }
 
-  let { polygon } = req.query;
   if (polygon) {
     polygon = polygon.split(/\s*,\s*/);
     if (polygon[0] !== polygon.slice(-1)[0]) {
@@ -486,11 +413,7 @@ export const main = (req, reply) => {
     where = 'WHERE mu.mukey IS NOT NULL';
   }
 
-  if ((!+lat || !+lon) && !mukey && !polygon) {
-    return reply.code(400).send('lat/lon, mukey, or polygon required');
-  }
-
-  ((req.query.categories || '').match(/[ -][a-z]+/g) || [])
+  ((categories || '').match(/[ -][a-z]+/g) || [])
     .forEach((cat) => {
       const t = cat.slice(1);
       let idx = cats.indexOf(`+${t}`);
@@ -503,7 +426,7 @@ export const main = (req, reply) => {
 
   if (psa) {
     if (mukey) {
-      ssurgo1();
+      return ssurgo1();
     } else {
       const query = polygon
         ? `
@@ -514,42 +437,22 @@ export const main = (req, reply) => {
           SELECT mukey FROM mupolygon
           WHERE ST_Contains(shape, ST_Transform(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), 5070))
         `;
-
-      pool.query(
-        query,
-        (error, results) => {
-          if (error) {
-            console.log(error);
-            reply.code(400).send(error);
-          } else {
-            mukey = results.rows.map((row) => `'${row.mukey}'`);
-            ssurgo1();
-          }
-        },
-      );
+      const { rows } = await pool.query(query);
+      mukey = rows.map((row) => `'${row.mukey}'`);
+      return ssurgo1();
     }
   } else {
     const query = polygon
       ? `SELECT mukey from SDA_Get_Mukey_from_intersection_with_WktWgs84('polygon((${polygon}))')`
       : `SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
 
-    // console.log(query);
-    axios
-      .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
-        query,
-        format: 'JSON',
-        encode: 'form',
-      })
-      .then((data) => {
-        mukey = data.data.Table.map((row) => `'${row[0]}'`);
-        ssurgo1();
-      })
-      .catch((error) => {
-        console.log('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-        console.log('ssurgo', query);
-        console.error('ssurgo', 'ERROR:', error.stack); // .split('\n')[4]);
-        console.error('ssurgo', query);
-        reply.code(400).send(error);
-      });
+    const data = await axios.post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+      query,
+      format: 'JSON',
+      encode: 'form',
+    })
+
+    mukey = data.data.Table.map((row) => `'${row[0]}'`);
+    return ssurgo1();
   }
-}; // main
+}; // ssurgo

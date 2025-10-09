@@ -46,6 +46,7 @@ const html = (out, opts) => {
         padding: 0.2em 0.5em;
         border-right: 1px solid #ddd;
         border-bottom: 1px solid #bbb;
+        white-space: nowrap;
       }
 
       th {
@@ -123,9 +124,7 @@ const html = (out, opts) => {
   `);
 }; // html
 
-const desc = (s) =>
-  s.replace(/([a-z])([A-Z])/g, '$1 $2')
-   .replace(/^./, c => c.toUpperCase());
+const desc = (s) => s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase());
 
 const makeSimpleRoute = (app, db, pluginOpts = {}) => {
   const props = async (query, parms) => {
@@ -144,7 +143,7 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
 
         results = await db.query(
           `${query} LIMIT 0`,
-          p
+          p,
         );
       } else {
         results = await db.query(`${query} LIMIT 0`);
@@ -174,13 +173,13 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
     const properties = isEmpty
       ? undefined
       : Object.fromEntries(
-          Object.entries(props).map(([k, v]) => [
-            k,
-            typeof v === 'string'
-              ? { type: 'string', enum: [v] }
-              : { type: 'string', ...v }
-          ])
-        );
+        Object.entries(props).map(([k, v]) => [
+          k,
+          typeof v === 'string'
+            ? { type: 'string', enum: [v] }
+            : { type: 'string', ...v },
+        ]),
+      );
 
     let required = [];
     parameters = Object.fromEntries(
@@ -188,8 +187,8 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
         k.toLowerCase(),
         typeof v === 'string'
           ? { type: 'string', description: desc(k) }
-          : { type: 'string', description: desc(k), ...v }
-      ])
+          : { type: 'string', description: desc(k), ...v },
+      ]),
     );
 
     required = Object.entries(parameters)
@@ -209,41 +208,41 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
     //   }
     // };
 
-   const useBody = opts?.method?.toLowerCase() === 'post';
-   const bodyProps  = parameters;           // e.g., points
-   const queryProps = opts?.query || {};    // e.g., output (optional)
+    const useBody = opts?.method?.toLowerCase() === 'post';
+    const bodyProps  = parameters;           // e.g., points
+    const queryProps = opts?.query || {};    // e.g., output (optional)
    
-   const successSchema = opts.response ?? (
-     Object.keys(props).length === 1
-       ? { type: 'array' }
-       : isEmpty
-         ? { type: 'array', items: { type: 'object', additionalProperties: true } }
-         : {
-             type: 'array',
-             additionalProperties: false,
-             items: {
-               // additionalProperties: true,
-               properties
-             }
-           }
-   );
+    const successSchema = opts.response ?? (
+      Object.keys(props).length === 1
+        ? { type: 'array' }
+        : isEmpty
+          ? { type: 'array', items: { type: 'object', additionalProperties: true } }
+          : {
+            type: 'array',
+            additionalProperties: false,
+            items: {
+              // additionalProperties: true,
+              properties,
+            },
+          }
+    );
 
-  const schemaBlock = useBody
-    ? {
+    const schemaBlock = useBody
+      ? {
         body: {
           type: 'object',
           additionalProperties: false,
           properties: { ...bodyProps },
-          ...(required.length ? { required } : {})
-        }
+          ...(required.length ? { required } : {}),
+        },
       }
-    : {
+      : {
         querystring: {
           type: 'object',
           additionalProperties: false,
           properties: { ...bodyProps },
-          ...(required.length ? { required } : {})
-        }
+          ...(required.length ? { required } : {}),
+        },
       };
 
     const response = {
@@ -252,7 +251,7 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
         type: 'object',
         required: ['error'],
         additionalProperties: false,
-        properties: { error: { type: 'string', enum: [dberr] }}
+        properties: { error: { type: 'string', enum: [dberr] }},
       },
     };
 
@@ -265,12 +264,12 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
         ...schemaBlock,
         ...(useBody && Object.keys(queryProps).length
           ? {
-              querystring: {
-                type: 'object',
-                additionalProperties: false,
-                properties: { ...queryProps },
-              }
-            }
+            querystring: {
+              type: 'object',
+              additionalProperties: false,
+              properties: { ...queryProps },
+            },
+          }
           : {}
         ),
       },
@@ -300,7 +299,7 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
         } else {
           return out;
         }
-      }
+      },
     };
   }; // route
 
@@ -315,22 +314,28 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
       const inputs = query.toString().split('(')[1].split(')')[0].split(/\s*,\s*/).filter((s) => s);
       const inputSchema = {};
       if (!routeName.includes(':')) {
-        for (const f of inputs) {
+        for (const f of inputs.filter((input) => input !== 'req' && input !== 'reply')) {
           inputSchema[f] = 'string';
         }
       }
 
-      await app[opts.method || 'get'](routeName,
+      await app[opts?.method || 'get'](routeName,
         route(
           tag,
           summary,
           inputSchema,
-          (req) => {
+          (req, reply) => {
             // handle missing inputs, case-sensitivity, and parameterized routes
             const src = useBody ? (req.body ?? {}) : (req.query ?? {});
             const p = [];
             inputs.forEach((input) => {
-              p.push(src[input.toLowerCase()] ?? req.params[input] ?? '');
+              p.push(
+                input === 'req'
+                  ? req
+                  : input === 'reply'
+                    ? reply
+                    : src[input.toLowerCase()] ?? req.params[input] ?? '',
+              );
             });
             return query(...p);
           },
@@ -338,11 +343,11 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
             ...inputSchema,
             ...(parms || {}),
           },
-          opts
-        )
+          opts,
+        ),
       );
     } else {
-      await app[opts.method || 'get'](routeName,
+      await app[opts?.method || 'get'](routeName,
         route(
           tag,
           summary,
@@ -368,7 +373,7 @@ const makeSimpleRoute = (app, db, pluginOpts = {}) => {
           },
           parms,
           opts,
-        )
+        ),
       );
     }
   };

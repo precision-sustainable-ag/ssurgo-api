@@ -29,6 +29,8 @@ export default [
       'max-len': ['error', { code: 150, ignoreUrls: true, ignoreStrings: true, ignoreTemplateLiterals: true, ignoreComments: true }],
       'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
 
+      'indent': ['error', 2, { 'SwitchCase': 1 }],
+      'comma-dangle': ['error', 'always-multiline'],
       // allow await in for...of but not other loops
       'no-await-in-loop': 'off',
       'no-restricted-syntax': [
