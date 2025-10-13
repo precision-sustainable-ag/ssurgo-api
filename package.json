@@ -1,33 +1,29 @@
 {
-  "name": "weather",
+  "name": "ssurgo",
   "version": "1.0.0",
-  "description": "weather-api",
+  "description": "ssurgo-api",
   "main": "index.js",
+  "type": "module",
   "dependencies": {
     "axios": "^1.12.2",
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
-    "express": "^4.21.2",
-    "open": "^8.4.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "simple-route": "github:precision-sustainable-ag/simple-route"
   },
   "scripts": {
-    "start": "node index.js",
-    "build": "cd public/client && npm install && npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon ./src/server.js",
+    "start": "node ./src/server.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/precision-sustainable-ag/weather-api.git"
+    "url": "git+https://github.com/precision-sustainable-ag/ssurgo.git"
   },
   "keywords": [
-    "weather"
+    "ssurgo"
   ],
   "author": "Rick Hitchcock",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/precision-sustainable-ag/weather-api/issues"
+    "url": "https://github.com/precision-sustainable-ag/ssurgo/issues"
   },
-  "homepage": "https://github.com/precision-sustainable-ag/weather-api#readme"
+  "homepage": "https://github.com/precision-sustainable-ag/ssurgo#readme"
 }
