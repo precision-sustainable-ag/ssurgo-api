@@ -1,4 +1,5 @@
-import { setup } from './app.js';
+import { setup } from 'simple-route';
+
 import apiRoutes from './routes/api.js';
 
 await setup({
