@@ -1,12 +1,6 @@
 import { pool } from './pools.js';
 
 export const mapunits = async (points) => {
-  // const { points } = req.body; // expecting [{ lat, lon }, ...]
-
-  // if (!Array.isArray(points) || points.length === 0) {
-  //   return reply.code(400).send({ error: 'Missing or invalid "points" array' });
-  // }
-
   const valuesSql = points
     .map((p) => `(${parseFloat(p.lon)}, ${parseFloat(p.lat)})`)
     .join(',\n');
