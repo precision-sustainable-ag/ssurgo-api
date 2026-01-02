@@ -6,6 +6,8 @@
   "type": "module",
   "dependencies": {
     "axios": "^1.12.2",
+    "dotenv": "^17.2.3",
+    "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "simple-route": "github:precision-sustainable-ag/simple-route"
   },
