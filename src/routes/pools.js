@@ -1,4 +1,6 @@
-const { Pool } = require('pg');
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 
 const pool = new Pool({
   user: process.env.USER,
@@ -11,6 +13,4 @@ const pool = new Pool({
   },
 });
 
-module.exports = {
-  pool,
-};
+export { pool };

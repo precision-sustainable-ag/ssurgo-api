@@ -4,7 +4,6 @@ node_modules/
 python/
 MRMS/
 Julia/
-package-lock.json
 .env
 .Rproj.user
 *.Rproj
@@ -12,3 +11,5 @@ package-lock.json
 api_token_example.txt
 .git
 points.json
+run
+code.zip
