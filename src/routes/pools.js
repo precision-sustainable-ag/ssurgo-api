@@ -1,5 +1,6 @@
-import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import { Pool } from 'pg';
+
 dotenv.config({ override: true });
 
 const pool = new Pool({

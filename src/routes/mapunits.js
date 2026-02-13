@@ -1,9 +1,7 @@
 import { pool } from './pools.js';
 
 export const mapunits = async (points) => {
-  const valuesSql = points
-    .map((p) => `(${parseFloat(p.lon)}, ${parseFloat(p.lat)})`)
-    .join(',\n');
+  const valuesSql = points.map((p) => `(${parseFloat(p.lon)}, ${parseFloat(p.lat)})`).join(',\n');
 
   const query = `
     SELECT 
