@@ -17,12 +17,13 @@ export const vegspec = async (lat, lon, server) => {
   } else {
     const query = `SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lon} ${lat})')`;
 
-    mukey = (await axios
-      .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+    mukey = (
+      await axios.post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
         query,
         format: 'JSON',
         encode: 'form',
-      })).data.Table[0][0];
+      })
+    ).data.Table[0][0];
   }
 
   const sq = `
@@ -89,12 +90,11 @@ export const vegspec = async (lat, lon, server) => {
   if (psa) {
     results = await pool.query(sq);
   } else {
-    const data = await axios
-      .post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
-        query: sq,
-        format: 'JSON+COLUMNNAME',
-        encode: 'form',
-      });
+    const data = await axios.post(`https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest`, {
+      query: sq,
+      format: 'JSON+COLUMNNAME',
+      encode: 'form',
+    });
 
     const data1 = [];
     const table = data.data.Table || [];
