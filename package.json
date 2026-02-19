@@ -7,12 +7,11 @@
   "dependencies": {
     "axios": "^1.12.2",
     "dotenv": "^17.2.3",
-    "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "simple-route": "github:precision-sustainable-ag/simple-route"
   },
   "scripts": {
-    "dev": "nodemon ./src/server.js",
+    "dev": "node --watch --watch-path=.env --watch-path=src --watch-path=public src/server.js",
     "start": "node ./src/server.js"
   },
   "repository": {
