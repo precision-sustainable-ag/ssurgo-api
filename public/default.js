@@ -108,6 +108,27 @@ $(() => {
         });
     });
 
+    $('#XLSX').click(() => {
+      $('#Status').html('<img src="/spinner.gif">');
+
+      fetch(`${$('#URL').text()}&output=xlsx`)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'output.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          window.URL.revokeObjectURL(url);
+
+          $('#Status').empty();
+        });
+    });
+
     $('#Lat, #Lon, #Categories input').change(updateURL);
 
     $('#Clear').click(() => {
