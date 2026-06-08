@@ -2,31 +2,32 @@
 //  http://localhost/polygon?lat=35&lon=-79&output=json&server=usda
 
 import { makeSimpleRoute } from 'simple-route';
-
-import { pool } from './pools.js';
-import { vegspec } from './vegspec.js';
-import { polygon } from './polygon.js';
 import { mapunits } from './mapunits.js';
+import { polygon } from './polygon.js';
+import { pool } from './pools.js';
 import { ssurgo } from './ssurgo.js';
+import { vegspec } from './vegspec.js';
 
 export default async function apiRoutes(app) {
   const simpleRoute = makeSimpleRoute(app, pool, { public: true });
 
-  await simpleRoute('/',
+  await simpleRoute(
+    '/',
     'Database',
     'Query SSURGO attributes by point, polygon, or mukey',
     ssurgo,
     {
       lat: { type: 'number', examples: [35] },
       lon: { type: 'number', examples: [-79] },
-      server: { examples: ['psa', 'usda']},
+      server: { examples: ['psa', 'usda'] },
     },
     {
       200: {}, // allow any output
     },
   );
 
-  await simpleRoute('/mapunits',
+  await simpleRoute(
+    '/mapunits',
     'Database',
     'Get dominant SSURGO component for each point',
     mapunits,
@@ -57,7 +58,8 @@ export default async function apiRoutes(app) {
     },
   );
 
-  await simpleRoute('/vegspec',
+  await simpleRoute(
+    '/vegspec',
     'Database',
     'Horizon- and component-level SSURGO details for the mapunit at a point',
     vegspec,
@@ -89,7 +91,8 @@ export default async function apiRoutes(app) {
     },
   );
 
-  await simpleRoute('/polygon',
+  await simpleRoute(
+    '/polygon',
     'Database',
     'Retrieve SSURGO polygon (mupolygon) geometry for a given point',
     polygon,
@@ -113,4 +116,4 @@ export default async function apiRoutes(app) {
       },
     },
   );
-};
+}

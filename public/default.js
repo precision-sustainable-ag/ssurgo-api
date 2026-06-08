@@ -5,17 +5,23 @@ $(() => {
     const filter = $('#Filter').val().trim();
     const cats = !$('#Categories input.on:checked').length
       ? [
-        ...['clear'],
-        ...$('#Categories input.off:checked').map(function() { return '+' + this.value; }),
-      ]
+          ...['clear'],
+          ...$('#Categories input.off:checked').map(function () {
+            return `+${this.value}`;
+          }),
+        ]
       : [
-        ...$('#Categories input.on:not(:checked)').map(function() { return '-' + this.value; }),
-        ...$('#Categories input.off:checked').map(function() { return '+' + this.value; }),
-      ];
+          ...$('#Categories input.on:not(:checked)').map(function () {
+            return `-${this.value}`;
+          }),
+          ...$('#Categories input.off:checked').map(function () {
+            return `+${this.value}`;
+          }),
+        ];
 
     $('#Data thead, #Data tbody').empty();
 
-    let url = window.location.origin + `/?lat=${lat}&lon=${lon}&server=${$('#Server').val()}`;
+    let url = `${window.location.origin}/?lat=${lat}&lon=${lon}&server=${$('#Server').val()}`;
 
     if (cats.length) {
       url += `&categories=${cats}`;
@@ -27,7 +33,7 @@ $(() => {
 
     $('#URL').html(`<a target="new" href="${url}">${url}</a>`);
 
-    fetch($('#URL').text() + '&output=query')
+    fetch(`${$('#URL').text()}&output=query`)
       .then((response) => response.text())
       .then((data) => {
         $('#Query').text(data.replace(/[\n\r]\s*/g, '\n'));
@@ -39,9 +45,9 @@ $(() => {
 
     $('#Data thead, #Data tbody').empty();
 
-    fetch($('#URL').text() + '&output=html')
-      .then(response => response.text())
-      .then(data => {
+    fetch(`${$('#URL').text()}&output=html`)
+      .then((response) => response.text())
+      .then((data) => {
         if (!data.length) {
           $('#Status').html('No data found');
         } else {
@@ -67,13 +73,13 @@ $(() => {
   }; // output
 
   const events = () => {
-    $('#Server').change(function() {
+    $('#Server').change(function () {
       $('.server').text($(this).val().toUpperCase());
       updateURL();
     });
 
-    $('#Query').keypress(e => {
-      e.stopImmediatePropagation()
+    $('#Query').keypress((e) => {
+      e.stopImmediatePropagation();
       e.stopPropagation();
       return false;
     });
@@ -83,22 +89,43 @@ $(() => {
     $('#CSV').click(() => {
       $('#Status').html('<img src="/spinner.gif">');
 
-      fetch($('#URL').text() + '&output=csv')
+      fetch(`${$('#URL').text()}&output=csv`)
         .then((data) => data.text())
         .then((data) => {
           $('#Status').empty();
-          output(data, 'csv')
+          output(data, 'csv');
         });
     });
 
     $('#JSON').click(() => {
       $('#Status').html('<img src="/spinner.gif">');
 
-      fetch($('#URL').text() + '&output=json')
+      fetch(`${$('#URL').text()}&output=json`)
         .then((data) => data.json())
         .then((data) => {
           $('#Status').empty();
-          output(JSON.stringify(data, null, 2), 'text')
+          output(JSON.stringify(data, null, 2), 'text');
+        });
+    });
+
+    $('#XLSX').click(() => {
+      $('#Status').html('<img src="/spinner.gif">');
+
+      fetch(`${$('#URL').text()}&output=xlsx`)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'output.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          window.URL.revokeObjectURL(url);
+
+          $('#Status').empty();
         });
     });
 
@@ -117,7 +144,7 @@ $(() => {
 
     $('#Filter').on('input', updateURL);
 
-    $('nav button').click(function() {
+    $('nav button').click(function () {
       $('nav button').removeClass('selected');
       $(this).addClass('selected');
     });
@@ -133,17 +160,25 @@ $(() => {
     });
   }; // events
 
-  fetch('Inventory.txt?' + Math.random())
+  fetch(`Inventory.txt?${Math.random()}`)
     .then((data) => data.text())
     .then((data) => {
       // $('#Documentation').show(); $('#SSURGO').hide();
-      data = data.replace(/\t"/g, '\t').replace(/"[\r\n]/g, '\n').replace(/""/g, '"');
+      data = data
+        .replace(/\t"/g, '\t')
+        .replace(/"[\r\n]/g, '\n')
+        .replace(/""/g, '"');
 
-      $('#Dictionary').html('<tr><td>' + data.replace(/\t/g, '<td>').split(/[\n\r]+/).join('<tr><td>'));
+      $('#Dictionary').html(
+        `<tr><td>${data
+          .replace(/\t/g, '<td>')
+          .split(/[\n\r]+/)
+          .join('<tr><td>')}`,
+      );
 
       for (let i = 3; i >= 1; i--) {
         let span = 1;
-        $([...$(`#Dictionary tr:nth-child(n + 2) td:nth-child(${i})`)].reverse()).each(function(i) {
+        $([...$(`#Dictionary tr:nth-child(n + 2) td:nth-child(${i})`)].reverse()).each(function () {
           if ($(this).text().trim()) {
             $(this).attr('rowspan', span).addClass('sticky').parent().addClass('sticky');
             span = 1;
@@ -152,14 +187,14 @@ $(() => {
             span++;
           }
         });
-        
+
         $('td.remove').addClass('hidden');
         // $('td.remove').remove();
       }
 
       const colors = ['#def', '#fed', '#dfd', '#fdf'];
       let c = 0;
-      $('#Dictionary tr:nth-child(n + 2) td:nth-child(1):not(:empty)').each(function(i) {
+      $('#Dictionary tr:nth-child(n + 2) td:nth-child(1):not(:empty)').each(function () {
         c += 1;
 
         for (let $tr = $(this).parent(), i = 1; i <= this.rowSpan; i++, $tr = $tr.next()) {

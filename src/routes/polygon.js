@@ -19,7 +19,8 @@ const wktToGeoJSON = (wkt) => {
   return geojson;
 }; // wktToGeoJSON
 
-export const polygon = async (lat, lon, server) => { // SLOW, and often causes 400 or 500 error
+export const polygon = async (lat, lon, server) => {
+  // SLOW, and often causes 400 or 500 error
   if (server === 'usda') {
     const query = `
       SELECT ${lon} as lon, ${lat} as lat, mukey, mupolygongeo
