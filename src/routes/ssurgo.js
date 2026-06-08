@@ -632,7 +632,7 @@ export const ssurgo = async (
     if (showseriesonly === 'false') {
       seriesOnly = '';
     } else if (test('component|parentmaterial|restrictions|horizon|pores|structure|textureclass')) {
-      seriesOnly = `AND compkind='Series' `;
+      seriesOnly = `AND compkind IN ('Series', 'Taxadjunct') `;
     } else {
       seriesOnly = '';
     }
