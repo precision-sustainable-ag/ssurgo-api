@@ -34,17 +34,17 @@ stages:
       vmImage: $(vmImageName)
     steps:
     - script: |
-        echo USER="$(USER)" >> /home/vsts/work/1/s/.env
-        echo PASSWORD="$(PASSWORD)" >> /home/vsts/work/1/s/.env
-        echo HOST="$(HOST)" >> /home/vsts/work/1/s/.env
-        echo DATABASE="$(DATABASE)" >> /home/vsts/work/1/s/.env
-        echo PORT="$(PORT)" >> /home/vsts/work/1/s/.env
-        echo WEATHER_USER="$(WEATHER_USER)" >> /home/vsts/work/1/s/.env
-        echo WEATHER_PASSWORD="$(WEATHER_PASSWORD)" >> /home/vsts/work/1/s/.env
-        echo WEATHER_HOST="$(WEATHER_HOST)" >> /home/vsts/work/1/s/.env
-        echo WEATHER_DATABASE="$(WEATHER_DATABASE)" >> /home/vsts/work/1/s/.env
-        echo WEATHER_PORT="$(WEATHER_PORT)" >> /home/vsts/work/1/s/.env
-        cat /home/vsts/work/1/s/.env
+        echo USER="$(USER)" >> $(Build.SourcesDirectory)/.env
+        echo PASSWORD="$(PASSWORD)" >> $(Build.SourcesDirectory)/.env
+        echo HOST="$(HOST)" >> $(Build.SourcesDirectory)/.env
+        echo DATABASE="$(DATABASE)" >> $(Build.SourcesDirectory)/.env
+        echo PORT="$(PORT)" >> $(Build.SourcesDirectory)/.env
+        echo WEATHER_USER="$(WEATHER_USER)" >> $(Build.SourcesDirectory)/.env
+        echo WEATHER_PASSWORD="$(WEATHER_PASSWORD)" >> $(Build.SourcesDirectory)/.env
+        echo WEATHER_HOST="$(WEATHER_HOST)" >> $(Build.SourcesDirectory)/.env
+        echo WEATHER_DATABASE="$(WEATHER_DATABASE)" >> $(Build.SourcesDirectory)/.env
+        echo WEATHER_PORT="$(WEATHER_PORT)" >> $(Build.SourcesDirectory)/.env
+        cat $(Build.SourcesDirectory)/.env
       displayName: "Create .env"
     - task: Docker@2
       displayName: Build and push an image to container registry
